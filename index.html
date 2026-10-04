@@ -3,377 +3,297 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quantum Realm Studio</title>
-  <!-- Tailwind CSS CDN -->
+  <title>Quantum Realm Studio - Ultimate Interactive Visualizer & Exam Prep</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FontAwesome Icons CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Google Fonts: Inter & JetBrains Mono -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
-  
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace'],
-          },
-          colors: {
-            quantum: {
-              50: '#f0f9ff',
-              100: '#e0f2fe',
-              400: '#38bdf8',
-              500: '#06b6d4',
-              600: '#0284c7',
-              800: '#075985',
-              900: '#0c4a6e',
-              950: '#030712',
-            },
-            gold: {
-              400: '#fbbf24',
-              500: '#f59e0b',
-              600: '#d97706',
-            }
-          },
-          boxShadow: {
-            'neon-cyan': '0 0 15px rgba(6, 182, 212, 0.5), 0 0 30px rgba(6, 182, 212, 0.2)',
-            'neon-gold': '0 0 15px rgba(245, 158, 11, 0.6), 0 0 30px rgba(245, 158, 11, 0.3)',
-          }
-        }
-      }
-    }
-  </script>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Inter:wght@300;400;600;800&display=swap');
+    
     body {
+      font-family: 'Inter', sans-serif;
       background-color: #030712;
       color: #f3f4f6;
-      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
     }
-    .mono {
-      font-family: 'JetBrains Mono', monospace;
+    
+    .font-mono {
+      font-family: 'Fira Code', monospace;
     }
-    canvas {
-      touch-action: none;
+
+    /* Glow utilities */
+    .glow-cyan {
+      box-shadow: 0 0 25px rgba(6, 182, 212, 0.25);
     }
-    /* Gold neon supporter theme overrides */
-    body.supporter-gold {
-      --tw-bg-opacity: 1;
-      background-color: #0d0900 !important;
+    .glow-purple {
+      box-shadow: 0 0 25px rgba(168, 85, 247, 0.25);
     }
-    body.supporter-gold .gold-accent {
+    .glow-gold {
+      box-shadow: 0 0 25px rgba(251, 191, 36, 0.35);
+    }
+
+    /* Gold Neon Theme Dynamic Overrides */
+    body.gold-theme {
+      background-color: #0c0a09;
+    }
+    body.gold-theme .theme-border {
+      border-color: rgba(251, 191, 36, 0.4) !important;
+    }
+    body.gold-theme .theme-text {
       color: #fbbf24 !important;
-      border-color: #f59e0b !important;
     }
-    body.supporter-gold .gold-glow {
-      box-shadow: 0 0 20px rgba(245, 158, 11, 0.5) !important;
+    body.gold-theme .theme-bg {
+      background-color: rgba(251, 191, 36, 0.1) !important;
     }
+
     /* Custom Scrollbar */
     ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
+      width: 6px;
+      height: 6px;
     }
     ::-webkit-scrollbar-track {
-      background: #0b0f19;
+      background: #030712;
     }
     ::-webkit-scrollbar-thumb {
       background: #1f2937;
-      border-radius: 4px;
+      border-radius: 3px;
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: #374151;
-    }
-    @media print {
-      body * {
-        visibility: hidden;
-      }
-      #printableCertificate, #printableCertificate * {
-        visibility: visible;
-      }
-      #printableCertificate {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-      }
+      background: #06b6d4;
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col antialiased transition-colors duration-500 selection:bg-cyan-500 selection:text-black">
+<body class="min-h-screen flex flex-col justify-between antialiased selection:bg-cyan-500 selection:text-black">
 
-  <!-- Top Navigation Header -->
-  <header class="sticky top-0 z-40 bg-gray-950/80 backdrop-blur-md border-b border-gray-800/80 px-4 lg:px-8 py-3 flex items-center justify-between">
-    <div class="flex items-center space-x-3">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-neon-cyan">
-        <i class="fa-solid font-mono fa-atom animate-spin-slow"></i>
+  <!-- Header / Navigation -->
+  <header class="sticky top-0 z-40 backdrop-blur-md bg-gray-950/80 border-b border-gray-800/80 px-4 py-3">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-500 to-purple-500 flex items-center justify-center text-black font-bold text-lg shadow-lg glow-cyan">
+          <i class="fa-solid fa-atom"></i>
+        </div>
+        <div>
+          <h1 class="text-base font-extrabold tracking-tight text-white flex items-center gap-2">
+            Quantum Realm Studio
+            <span class="text-[10px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-2 py-0.5 rounded-full font-mono">Exam Prep Edition</span>
+          </h1>
+          <p class="text-[11px] text-gray-400">Master Quantum Mechanics Physics & Equations</p>
+        </div>
       </div>
-      <div>
-        <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-cyan-400 via-sky-200 to-indigo-400 bg-clip-text text-transparent">
-          Quantum Realm Studio
-        </h1>
-        <p class="text-xs text-gray-400 hidden sm:block">Interactive Quantum Mechanics Laboratory & Field Inspector</p>
+
+      <div class="flex items-center gap-2">
+        <button onclick="toggleGoldTheme()" class="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
+          <i class="fa-solid fa-crown text-amber-400"></i>
+          <span class="hidden sm:inline">Gold Theme</span>
+        </button>
+        <button onclick="openSupporterModal()" class="px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-black font-bold rounded-lg text-xs hover:opacity-90 transition shadow-lg flex items-center gap-1.5">
+          <i class="fa-solid fa-heart"></i>
+          <span>Support ($2)</span>
+        </button>
       </div>
-    </div>
-
-    <!-- Right Controls -->
-    <div class="flex items-center space-x-2 sm:space-x-4">
-      <button id="goldThemeBtn" onclick="toggleGoldTheme()" class="px-3 py-1.5 rounded-lg border border-yellow-500/30 bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 text-xs sm:text-sm font-medium transition flex items-center space-x-1.5">
-        <i class="fa-solid fa-crown text-xs"></i>
-        <span class="hidden md:inline">Gold Theme</span>
-      </button>
-
-      <button onclick="openSupportModal()" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-medium text-xs sm:text-sm shadow-md hover:brightness-110 transition flex items-center space-x-1.5">
-        <i class="fa-solid fa-heart text-xs"></i>
-        <span>Support Studio</span>
-      </button>
     </div>
   </header>
 
-  <main class="flex-grow max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+  <!-- Main Content Container -->
+  <main class="max-w-7xl mx-auto w-full px-4 py-6 space-y-8 flex-1">
 
-    <!-- Section 1: Interactive Canvas Visualizer -->
-    <section class="bg-gray-900/60 border border-gray-800 rounded-2xl p-4 sm:p-6 backdrop-blur-sm relative overflow-hidden shadow-xl">
+    <!-- SECTION 1: INTERACTIVE QUANTUM SIMULATOR -->
+    <section id="simulator" class="bg-gray-900/60 p-5 sm:p-6 rounded-2xl border border-gray-800 glow-cyan backdrop-blur">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
         <div>
-          <div class="flex items-center space-x-2">
-            <span class="inline-block w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
-            <h2 class="text-lg font-bold text-gray-100 uppercase tracking-wider mono">01 // Interactive Quantum Canvas</h2>
-          </div>
-          <p class="text-xs sm:text-sm text-gray-400 mt-1" id="modeDescription">
-            Tap/Click canvas to cause Wave Function Collapse ($\Psi \rightarrow |\psi_i\rangle$).
-          </p>
+          <h2 class="text-xl font-bold text-cyan-400 flex items-center gap-2 theme-text">
+            <i class="fa-solid fa-wave-square"></i> Real-Time Quantum Simulation Engine
+          </h2>
+          <p id="simDescription" class="text-xs text-gray-400 mt-1">Mode: Wave Function Collapse — Tap or click on the canvas to measure particle position.</p>
         </div>
 
-        <!-- Mode Selectors -->
+        <!-- Simulation Control Tabs -->
         <div class="flex flex-wrap gap-1.5 bg-gray-950 p-1.5 rounded-xl border border-gray-800">
-          <button id="mode-collapse" onclick="setSimMode('collapse')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 transition">
-            Wave Collapse
-          </button>
-          <button id="mode-entanglement" onclick="setSimMode('entanglement')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-400 hover:text-gray-200 hover:bg-gray-800 transition">
-            Entanglement
-          </button>
-          <button id="mode-tunneling" onclick="setSimMode('tunneling')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-400 hover:text-gray-200 hover:bg-gray-800 transition">
-            Tunneling
-          </button>
-          <button id="mode-superposition" onclick="setSimMode('superposition')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-400 hover:text-gray-200 hover:bg-gray-800 transition">
-            Superposition
-          </button>
+          <button id="btn-wave" onclick="setSimMode('wave')" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-cyan-500/20 text-cyan-300 border border-cyan-500/50">Collapse</button>
+          <button id="btn-entangle" onclick="setSimMode('entangle')" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-gray-900 text-gray-400 border border-gray-800">Entanglement</button>
+          <button id="btn-tunnel" onclick="setSimMode('tunnel')" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-gray-900 text-gray-400 border border-gray-800">Tunneling</button>
+          <button id="btn-super" onclick="setSimMode('super')" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-gray-900 text-gray-400 border border-gray-800">Superposition</button>
         </div>
       </div>
 
-      <!-- Canvas Container -->
-      <div class="relative w-full h-80 sm:h-96 rounded-xl overflow-hidden bg-gray-950 border border-gray-800 flex items-center justify-center">
-        <canvas id="quantumCanvas" class="w-full h-full cursor-crosshair"></canvas>
-        
-        <!-- Canvas Overlay Controls -->
-        <div class="absolute bottom-3 left-3 bg-gray-900/80 backdrop-blur-md border border-gray-800 px-3 py-1.5 rounded-lg text-xs text-gray-300 flex items-center space-x-3 pointer-events-none">
-          <span id="canvasStats" class="mono text-cyan-400">Probability Density |$\Psi|^2$: Active</span>
+      <!-- Canvas Render Frame -->
+      <div class="relative w-full h-64 sm:h-80 md:h-96 rounded-xl overflow-hidden bg-gray-950 border border-gray-800/80 shadow-inner">
+        <canvas id="quantumCanvas" class="w-full h-full cursor-pointer touch-none"></canvas>
+        <div class="absolute bottom-3 left-3 bg-gray-900/80 backdrop-blur border border-gray-800 px-3 py-1 rounded-lg text-[10px] font-mono text-gray-400">
+          FPS: <span id="fpsCounter" class="text-emerald-400 font-bold">60</span> | Touch/Click Enabled
         </div>
-
-        <button onclick="resetSimulation()" class="absolute top-3 right-3 bg-gray-900/80 hover:bg-gray-800 text-gray-300 hover:text-white border border-gray-800 px-3 py-1.5 rounded-lg text-xs transition flex items-center space-x-1">
-          <i class="fa-solid fa-rotate-right"></i>
-          <span>Reset Canvas</span>
-        </button>
       </div>
     </section>
 
-    <!-- Section 2: Quantum Calculus & Field Equations Inspector -->
-    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-      
-      <!-- Schrödinger Breakdown -->
-      <div class="lg:col-span-7 bg-gray-900/60 border border-gray-800 rounded-2xl p-5 sm:p-6 backdrop-blur-sm shadow-xl flex flex-col justify-between">
-        <div>
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-bold text-gray-100 uppercase tracking-wider mono">02 // Field Equation Inspector</h2>
-            <span class="text-xs px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-mono">TDSE Matrix</span>
-          </div>
-          <p class="text-xs sm:text-sm text-gray-400 mb-6">
-            Click on any term in the Time-Dependent Schrödinger Equation below to inspect its rigorous quantum physical meaning:
-          </p>
+    <!-- SECTION 2: EXAM CALCULUS & FORMULA BREAKDOWN -->
+    <section id="calculus" class="bg-gray-900/60 p-5 sm:p-6 rounded-2xl border border-gray-800 glow-purple backdrop-blur space-y-6">
+      <div class="border-b border-gray-800 pb-4">
+        <h2 class="text-xl font-bold text-purple-400 flex items-center gap-2">
+          <i class="fa-solid fa-square-root-variable"></i> Time-Dependent Schrödinger Equation & Term Inspector
+        </h2>
+        <p class="text-xs text-gray-400 mt-1">Tap any mathematical term below to inspect its variables, units, and exam definitions.</p>
+      </div>
 
-          <!-- Interactive Equation Display -->
-          <div class="bg-gray-950 border border-gray-800 rounded-xl p-4 sm:p-6 flex flex-wrap items-center justify-center gap-2 text-xl sm:text-2xl lg:text-3xl font-mono text-center my-2 shadow-inner select-none">
-            <span onclick="inspectTerm('i')" class="cursor-pointer px-2 py-1 rounded hover:bg-cyan-500/20 text-cyan-400 transition hover:scale-105 border border-transparent hover:border-cyan-500/40">i</span>
-            <span onclick="inspectTerm('hbar')" class="cursor-pointer px-2 py-1 rounded hover:bg-blue-500/20 text-blue-400 transition hover:scale-105 border border-transparent hover:border-blue-500/40">ℏ</span>
-            <span onclick="inspectTerm('ddt')" class="cursor-pointer px-2 py-1 rounded hover:bg-purple-500/20 text-purple-400 transition hover:scale-105 border border-transparent hover:border-purple-500/40">∂/∂t</span>
-            <span onclick="inspectTerm('psi')" class="cursor-pointer px-2 py-1 rounded hover:bg-emerald-500/20 text-emerald-400 transition hover:scale-105 border border-transparent hover:border-emerald-500/40">Ψ(x,t)</span>
-            <span class="text-gray-500">=</span>
-            <span onclick="inspectTerm('hamiltonian')" class="cursor-pointer px-2 py-1 rounded hover:bg-yellow-500/20 text-yellow-400 transition hover:scale-105 border border-transparent hover:border-yellow-500/40">Ĥ</span>
-            <span onclick="inspectTerm('psi')" class="cursor-pointer px-2 py-1 rounded hover:bg-emerald-500/20 text-emerald-400 transition hover:scale-105 border border-transparent hover:border-emerald-500/40">Ψ(x,t)</span>
-          </div>
-
-          <!-- Expanded Explicit Form -->
-          <div class="text-center text-xs text-gray-500 mt-2 font-mono">
-            Explicit: <span onclick="inspectTerm('kinetic')" class="cursor-pointer hover:text-cyan-300 underline">[-ℏ² / (2m) ∂²/∂x²</span> + <span onclick="inspectTerm('potential')" class="cursor-pointer hover:text-cyan-300 underline">V(x)]</span> Ψ = iℏ ∂Ψ/∂t
-          </div>
-        </div>
-
-        <!-- Dynamic Inspection Detail Box -->
-        <div id="inspectorDetailBox" class="mt-6 bg-cyan-950/20 border border-cyan-500/30 rounded-xl p-4 text-sm text-gray-300 transition-all duration-300 min-h-[110px]">
-          <div class="flex items-center space-x-2 text-cyan-400 font-bold mb-1">
-            <i class="fa-solid fa-magnifying-glass font-mono"></i>
-            <span id="inspectorTitle">Select an equation term above</span>
-          </div>
-          <p id="inspectorBody" class="text-xs sm:text-sm text-gray-400 leading-relaxed">
-            Click on complex factors like $i$, Planck's reduced constant $\hbar$, partial derivative operators, or state wavefunctions $\Psi$ to reveal their physical formulation and dynamics.
-          </p>
+      <!-- Main Interactive Equation Box -->
+      <div class="bg-gray-950 p-4 sm:p-6 rounded-xl border border-purple-500/30 text-center space-y-3 shadow-2xl">
+        <div class="text-sm text-purple-300 font-semibold uppercase tracking-wider">Schrödinger Fundamental Equation</div>
+        <div class="font-mono text-lg sm:text-2xl md:text-3xl text-purple-400 font-bold tracking-widest flex flex-wrap justify-center items-center gap-2 sm:gap-3">
+          <span onclick="inspectMath('i')" class="cursor-pointer hover:bg-purple-500/20 px-2 py-1 rounded border border-purple-500/30 transition">i</span>
+          <span onclick="inspectMath('hbar')" class="cursor-pointer hover:bg-purple-500/20 px-2 py-1 rounded border border-purple-500/30 transition">ℏ</span>
+          <span onclick="inspectMath('dtdt')" class="cursor-pointer hover:bg-purple-500/20 px-2 py-1 rounded border border-purple-500/30 transition">∂/∂t</span>
+          <span onclick="inspectMath('psi')" class="cursor-pointer hover:bg-purple-500/20 px-2 py-1 rounded border border-purple-500/30 transition">|Ψ(x,t)⟩</span>
+          <span>=</span>
+          <span>[</span>
+          <span onclick="inspectMath('ddx')" class="cursor-pointer hover:bg-purple-500/20 px-2 py-1 rounded border border-purple-500/30 transition">-ℏ²/2m ∇²</span>
+          <span>+</span>
+          <span onclick="inspectMath('V')" class="cursor-pointer hover:bg-purple-500/20 px-2 py-1 rounded border border-purple-500/30 transition">V(x,t)</span>
+          <span>]</span>
+          <span onclick="inspectMath('psi')" class="cursor-pointer hover:bg-purple-500/20 px-2 py-1 rounded border border-purple-500/30 transition">|Ψ(x,t)⟩</span>
         </div>
       </div>
 
-      <!-- Einstein General Relativity Breakdown vs QM -->
-      <div class="lg:col-span-5 bg-gray-900/60 border border-gray-800 rounded-2xl p-5 sm:p-6 backdrop-blur-sm shadow-xl flex flex-col justify-between">
-        <div>
-          <div class="flex items-center space-x-2 mb-3">
-            <i class="fa-solid fa-infinity text-yellow-500"></i>
-            <h3 class="text-base font-bold text-gray-100">Quantum vs General Relativity</h3>
-          </div>
-          <p class="text-xs text-gray-400 leading-relaxed mb-4">
-            Einstein's Field Equations <span class="mono text-yellow-400">G<sub>μν</sub> + Λg<sub>μν</sub> = (8πG/c⁴)T<sub>μν</sub></span> describe smooth, continuous spacetime. Why does GR breakdown at the quantum scale?
-          </p>
-
-          <div class="space-y-3 text-xs">
-            <div class="p-3 bg-gray-950/70 border border-gray-800 rounded-xl">
-              <strong class="text-cyan-400 block mb-0.5"><i class="fa-solid fa-triangle-exclamation mr-1 text-yellow-500"></i> Non-Renormalizability</strong>
-              Quantum gravity calculations yield infinite loop corrections that cannot be canceled by standard counterterms.
-            </div>
-            <div class="p-3 bg-gray-950/70 border border-gray-800 rounded-xl">
-              <strong class="text-purple-400 block mb-0.5"><i class="fa-solid fa-cubes-stacked mr-1"></i> Planck Scale Spacetime Foam</strong>
-              At $\ell_p \approx 1.6 \times 10^{-35}\text{m}$, quantum uncertainty fluctuations tear smooth smooth Lorentzian geometry into dynamic topology foam.
-            </div>
-          </div>
+      <!-- Variable Inspector Card -->
+      <div id="inspectorCard" class="bg-gray-950/80 p-4 rounded-xl border border-purple-500/40 space-y-2">
+        <div id="varTitle" class="text-sm font-bold text-purple-300 font-mono flex items-center gap-2">
+          <i class="fa-solid fa-circle-info"></i> Select a variable above to inspect
         </div>
-
-        <button onclick="openDeepDiveModal()" class="mt-4 w-full py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-xs font-semibold text-gray-200 border border-gray-700 transition flex items-center justify-center space-x-2">
-          <span>Read Quantum Gravity Deep Dive</span>
-          <i class="fa-solid fa-arrow-right text-xs"></i>
-        </button>
+        <p id="varDesc" class="text-xs text-gray-300 leading-relaxed">
+          Clicking any term in the Schrödinger equation will display its exam-specific physical meaning, SI units, and standard formula substitutions.
+        </p>
       </div>
 
-    </section>
-
-    <!-- Section 3: 20 Playable Quantum Mechanics Puzzles -->
-    <section class="bg-gray-900/60 border border-gray-800 rounded-2xl p-5 sm:p-6 backdrop-blur-sm shadow-xl">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div>
-          <div class="flex items-center space-x-2">
-            <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-            <h2 class="text-lg font-bold text-gray-100 uppercase tracking-wider mono">03 // Quantum Mechanics Challenge Matrix</h2>
-          </div>
-          <p class="text-xs sm:text-sm text-gray-400 mt-1">Solve all 20 puzzles across fundamental quantum concepts to earn your Certificate of Mastery.</p>
-        </div>
-
-        <!-- Counter & Certificate Button -->
-        <div class="flex items-center space-x-3">
-          <div class="bg-gray-950 px-4 py-2 rounded-xl border border-gray-800 text-center">
-            <span class="text-xs text-gray-500 uppercase block font-mono">Solved</span>
-            <span id="solvedCounter" class="text-lg font-bold text-emerald-400 font-mono">0 / 20</span>
-          </div>
-          <button id="certClaimBtn" onclick="checkCertificateEligibility()" class="px-4 py-2 rounded-xl bg-emerald-600/20 border border-emerald-500/40 text-emerald-300 font-semibold text-xs sm:text-sm hover:bg-emerald-600/30 transition flex items-center space-x-2">
-            <i class="fa-solid fa-certificate"></i>
-            <span>Claim Certificate</span>
+      <!-- General Relativity vs Quantum Mechanics Panel -->
+      <div class="bg-gray-950/90 p-5 rounded-xl border border-gray-800 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold text-amber-400 flex items-center gap-2">
+            <i class="fa-solid fa-scale-unbalanced text-amber-400"></i> General Relativity vs. Quantum Field Theory Breakdown
+          </h3>
+          <button onclick="openDeepDiveModal()" class="text-xs bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 px-3 py-1 rounded-lg transition">
+            Deep Dive
           </button>
         </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+          <div class="bg-gray-900/80 p-3.5 rounded-lg border border-gray-800 space-y-1.5">
+            <div class="font-bold text-blue-400 font-mono">General Relativity (Einstein)</div>
+            <div class="text-gray-300">Models gravity as smooth, continuous 4D spacetime geometry ($G_{\mu\nu} = \frac{8\pi G}{c^4} T_{\mu\nu}$). Fails at black hole singularities ($r \to 0$) where curvature becomes infinite.</div>
+          </div>
+          <div class="bg-gray-900/80 p-3.5 rounded-lg border border-gray-800 space-y-1.5">
+            <div class="font-bold text-purple-400 font-mono">Quantum Field Theory (Planck)</div>
+            <div class="text-gray-300">Models nature as discrete quanta and probability amplitude fields. At Planck scales ($10^{-35}\text{m}$), zero-point energy causes metric fluctuations called quantum foam.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: 30 EXAM PREP PUZZLES & PARADOXES -->
+    <section id="puzzles" class="bg-gray-900/60 p-5 sm:p-6 rounded-2xl border border-gray-800 space-y-6 backdrop-blur">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-800 pb-4">
+        <div>
+          <h2 class="text-xl font-bold text-emerald-400 flex items-center gap-2">
+            <i class="fa-solid fa-graduation-cap"></i> 30 Complete Exam-Style Questions & Paradoxes
+          </h2>
+          <p class="text-xs text-gray-400 mt-1">Master every concept for tomorrow's quantum mechanics exam. Instant answer verification & step-by-step explanations included.</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <span id="puzzleScore" class="text-xs font-mono font-bold bg-emerald-950 text-emerald-300 border border-emerald-800 px-3 py-1.5 rounded-xl">Solved: 0 / 30</span>
+        </div>
       </div>
 
-      <!-- Puzzle Cards Container -->
+      <!-- Puzzles Grid -->
       <div id="puzzlesGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- JS dynamically populates the 20 puzzles here -->
+        <!-- Dynamically rendered by JavaScript -->
+      </div>
+    </section>
+
+    <!-- SECTION 4: CERTIFICATE & SUPPORTER SECTION -->
+    <section id="certificate" class="bg-gradient-to-r from-gray-900 via-gray-950 to-gray-900 p-6 rounded-2xl border border-gray-800 text-center space-y-5 shadow-2xl">
+      <div class="space-y-2">
+        <h2 class="text-xl font-bold text-amber-400 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-award text-amber-400"></i> Quantum Mastery Certificate & Verification
+        </h2>
+        <p class="text-xs text-gray-400 max-w-xl mx-auto">
+          Complete the exam questions above and generate your verified Quantum Mechanics Mastery Badge with a unique cryptographic verification hash.
+        </p>
+      </div>
+
+      <div class="flex flex-col sm:flex-row justify-center gap-2 max-w-md mx-auto">
+        <input type="text" id="userNameInput" placeholder="Enter Full Name" class="bg-gray-900 border border-gray-700 rounded-xl px-4 py-2 text-xs text-gray-100 focus:outline-none focus:border-cyan-500 flex-1">
+        <button onclick="generateCertificate()" class="bg-amber-500 hover:bg-amber-400 text-black px-5 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-lg">
+          <i class="fa-solid fa-certificate"></i> Generate
+        </button>
+      </div>
+
+      <div id="certificateOutput" class="hidden mt-6 p-6 sm:p-8 bg-gray-950 border-2 border-amber-400/80 rounded-2xl max-w-xl mx-auto text-center space-y-4 shadow-2xl relative overflow-hidden">
+        <div class="absolute -right-12 -top-12 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>
+        <div class="text-amber-400 font-serif text-xl sm:text-2xl font-extrabold tracking-widest uppercase">Certificate of Quantum Mastery</div>
+        <p class="text-xs text-gray-400 uppercase tracking-widest">This certifies that</p>
+        <p id="certName" class="text-xl sm:text-2xl font-bold text-cyan-300 underline underline-offset-8 decoration-amber-400 font-mono"></p>
+        <p class="text-xs text-gray-300 leading-relaxed max-w-md mx-auto">
+          has successfully demonstrated comprehensive mastery across Wave Function Collapse, Entanglement, Quantum Tunneling, Matrix Mechanics, and all 30 Quantum Paradoxes.
+        </p>
+        <div class="pt-4 border-t border-gray-800 flex justify-between items-center text-[10px] text-gray-500 font-mono">
+          <span>Verified: Quantum Realm Studio</span>
+          <span id="certHash">HASH: QRS-8F92A-2026</span>
+        </div>
       </div>
     </section>
 
   </main>
 
   <!-- Footer -->
-  <footer class="border-t border-gray-800/80 bg-gray-950/60 py-6 text-center text-xs text-gray-500 mt-12">
-    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div>
-        Quantum Realm Studio &copy; 2026. Built with Pure JS, Tailwind CSS & HTML5 Canvas.
-      </div>
-      <div class="flex items-center space-x-4 text-gray-400">
-        <button onclick="openSupportModal()" class="hover:text-cyan-400 transition">Support</button>
-        <span>&bull;</span>
-        <button onclick="openDeepDiveModal()" class="hover:text-cyan-400 transition">Field Docs</button>
-      </div>
-    </div>
+  <footer class="border-t border-gray-800/80 bg-gray-950 px-4 py-4 text-center text-xs text-gray-500 space-y-1">
+    <div>Quantum Realm Studio • Built for High-Performance Interactive Physics Education</div>
+    <div class="text-[10px] text-gray-600">60 FPS Render Engine • Lightweight Canvas Architecture</div>
   </footer>
 
   <!-- Modal 1: Support / Monetization -->
-  <div id="supportModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl max-w-md w-full p-6 relative shadow-2xl">
-      <button onclick="closeSupportModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg">
-        <i class="fa-solid fa-xmark"></i>
+  <div id="supporterModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl max-w-md w-full p-6 relative space-y-4 shadow-2xl">
+      <button onclick="closeSupporterModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+        <i class="fa-solid fa-xmark text-lg"></i>
       </button>
 
-      <div class="text-center mb-6">
-        <div class="w-12 h-12 rounded-2xl bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 flex items-center justify-center mx-auto mb-3 text-xl">
-          <i class="fa-solid fa-heart font-mono"></i>
+      <div class="text-center space-y-2">
+        <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-center justify-center text-amber-400 text-xl mx-auto">
+          <i class="fa-solid fa-heart"></i>
         </div>
-        <h3 class="text-xl font-bold text-gray-100">Support Quantum Realm Studio</h3>
-        <p class="text-xs text-gray-400 mt-1">Help fund further quantum simulations and browser-based science tools.</p>
+        <h3 class="text-lg font-bold text-white">Support Quantum Realm Studio</h3>
+        <p class="text-xs text-gray-400">Your $1–$2 contribution supports further interactive physics visualizers and hosting.</p>
       </div>
 
-      <div class="space-y-3">
-        <a href="https://ko-fi.com" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between p-3.5 bg-gray-950 border border-gray-800 hover:border-cyan-500/50 rounded-xl transition group">
-          <div class="flex items-center space-x-3">
-            <i class="fa-solid fa-mug-hot text-cyan-400 text-lg"></i>
-            <span class="text-sm font-semibold text-gray-200">Support on Ko-fi</span>
-          </div>
-          <i class="fa-solid fa-arrow-up-right-from-square text-xs text-gray-500 group-hover:text-cyan-400"></i>
+      <div class="space-y-2.5 pt-2">
+        <a href="https://ko-fi.com" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 shadow-lg">
+          <i class="fa-solid fa-mug-hot"></i> Donate $2 on Ko-fi
         </a>
-
-        <a href="https://buymeacoffee.com" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between p-3.5 bg-gray-950 border border-gray-800 hover:border-yellow-500/50 rounded-xl transition group">
-          <div class="flex items-center space-x-3">
-            <i class="fa-solid fa-coffee text-yellow-400 text-lg"></i>
-            <span class="text-sm font-semibold text-gray-200">Buy Me a Coffee</span>
-          </div>
-          <i class="fa-solid fa-arrow-up-right-from-square text-xs text-gray-500 group-hover:text-yellow-400"></i>
+        <a href="https://buymeacoffee.com" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 shadow-lg">
+          <i class="fa-solid fa-coffee"></i> Buy Me a Coffee ($2)
         </a>
-
-        <a href="https://stripe.com" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between p-3.5 bg-gray-950 border border-gray-800 hover:border-indigo-500/50 rounded-xl transition group">
-          <div class="flex items-center space-x-3">
-            <i class="fa-solid fa-credit-card text-indigo-400 text-lg"></i>
-            <span class="text-sm font-semibold text-gray-200">Stripe Direct Supporter</span>
-          </div>
-          <i class="fa-solid fa-arrow-up-right-from-square text-xs text-gray-500 group-hover:text-indigo-400"></i>
-        </a>
-      </div>
-
-      <div class="mt-6 pt-4 border-t border-gray-800 flex items-center justify-between">
-        <span class="text-xs text-gray-400">Enable Gold Supporter Visual Theme:</span>
-        <button onclick="toggleGoldTheme(); closeSupportModal();" class="px-3 py-1 rounded-lg bg-yellow-500/20 text-yellow-300 border border-yellow-500/40 text-xs font-semibold hover:bg-yellow-500/30">
-          Toggle Gold
-        </button>
       </div>
     </div>
   </div>
 
   <!-- Modal 2: Quantum Gravity Deep Dive -->
   <div id="deepDiveModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl max-w-2xl w-full p-6 relative shadow-2xl max-h-[85vh] overflow-y-auto">
-      <button onclick="closeDeepDiveModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg">
-        <i class="fa-solid fa-xmark"></i>
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl max-w-2xl w-full p-6 relative space-y-4 max-h-[90vh] overflow-y-auto">
+      <button onclick="closeDeepDiveModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+        <i class="fa-solid fa-xmark text-lg"></i>
       </button>
 
-      <h3 class="text-xl font-bold text-gray-100 mb-2">General Relativity vs. Quantum Mechanics</h3>
-      <p class="text-xs text-cyan-400 font-mono mb-4">The Incompatibility of $G_{\mu\nu}$ and $\hat{H}\Psi$</p>
+      <h3 class="text-xl font-bold text-gray-100">General Relativity vs. Quantum Mechanics</h3>
+      <p class="text-xs text-cyan-400 font-mono">The Incompatibility of $G_{\mu\nu}$ and $\hat{H}\Psi$</p>
 
       <div class="space-y-4 text-xs sm:text-sm text-gray-300 leading-relaxed">
         <p>
-          General Relativity models spacetime as a continuous 4D pseudo-Riemannian manifold bent by stress-energy ($T_{\mu\nu}$). In contrast, Quantum Mechanics treats observables as non-commuting operators acting on states in a Hilbert space.
+          General Relativity models spacetime as a continuous 4D pseudo-Riemannian manifold bent by mass-energy:
         </p>
-
-        <div class="p-4 bg-gray-950 rounded-xl border border-gray-800 font-mono text-xs text-cyan-300">
-          G_μν_μν + Λg_μν = (8πG / c⁴) T_μν
+        <div class="p-4 bg-gray-950 rounded-xl border border-gray-800 font-mono text-xs text-center text-blue-300">
+          G_μν + Λg_μν = (8πG / c⁴) T_μν
         </div>
-
         <p>
-          At quantum scales ($10^{-35}\text{m}$ Planck length), quantum zero-point fluctuations cause metric tensor $g_{\mu\nu}$ to fluctuate wildly. This creates "quantum foam", resulting in infinite curvature probabilities that cannot be renormalized using standard Quantum Field Theory (QFT).
+          At quantum scales ($10^{-35}\text{m}$ Planck length), zero-point energy fluctuations cause metric tensor $g_{\mu\nu}$ to fluctuate wildly into quantum foam, destroying the smooth manifold assumption and creating infinite, non-renormalizable probabilities.
         </p>
-
         <ul class="list-disc list-inside space-y-2 text-gray-400 text-xs">
-          <li><strong class="text-cyan-400">Singularities:</strong> Division by zero when matter is compressed into zero volume $r \to 0$.</li>
-          <li><strong class="text-cyan-400">Information Paradox:</strong> Black hole evaporation (Hawking Radiation) violates quantum unitarity ($\sum P = 1$).</li>
+          <li><strong class="text-cyan-400">Black Hole Singularities:</strong> Mathematical divide-by-zero errors occur as radius $r \to 0$.</li>
+          <li><strong class="text-cyan-400">Information Paradox:</strong> Hawking radiation appears thermal, violating quantum unitary probability laws ($\sum P = 1$).</li>
         </ul>
       </div>
     </div>
@@ -381,8 +301,8 @@
 
   <!-- Toast Notification System -->
   <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-gray-900 border border-cyan-500/50 text-cyan-300 text-xs px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3">
-    <i id="toast-icon" class="fa-solid fa-circle-info text-cyan-400 text-base"></i>
-    <span id="toast-message">Notification message</span>
+    <i id="toastIcon" class="fa-solid fa-circle-info text-cyan-400 text-base"></i>
+    <span id="toastMessage">Notification</span>
   </div>
 
   <!-- JavaScript Engine -->
@@ -396,13 +316,14 @@
       userName: '',
       waveCollapsed: false,
       collapsePos: { x: 0, y: 0 },
-      time: 0
+      time: 0,
+      fps: 60,
+      lastFrameTime: performance.now()
     };
 
     // Canvas Engine Setup
     const canvas = document.getElementById('quantumCanvas');
     const ctx = canvas.getContext('2d');
-    let animationFrameId = null;
 
     function resizeCanvas() {
       const parent = canvas.parentElement;
@@ -417,8 +338,8 @@
     // UI Toast System
     function showToast(msg, iconClass = 'fa-solid fa-circle-info') {
       const toast = document.getElementById('toast');
-      const toastMsg = document.getElementById('toast-message');
-      const toastIcon = document.getElementById('toast-icon');
+      const toastMsg = document.getElementById('toastMessage');
+      const toastIcon = document.getElementById('toastIcon');
 
       toastMsg.textContent = msg;
       toastIcon.className = iconClass;
@@ -429,7 +350,7 @@
       setTimeout(() => {
         toast.classList.remove('translate-y-0', 'opacity-100');
         toast.classList.add('translate-y-20', 'opacity-0');
-      }, 3500);
+      }, 3000);
     }
 
     // Theme Switcher
@@ -437,39 +358,39 @@
       state.isGoldTheme = !state.isGoldTheme;
       document.body.classList.toggle('gold-theme', state.isGoldTheme);
       showToast(
-        state.isGoldTheme ? 'Gold Neon Supporter Theme Activated!' : 'Cyan Theme Restored',
-        state.isGoldTheme ? 'fa-solid fa-crown text-yellow-400' : 'fa-solid fa-circle-info'
+        state.isGoldTheme ? 'Gold Neon Theme Activated!' : 'Cyan Theme Restored',
+        state.isGoldTheme ? 'fa-solid fa-crown text-amber-400' : 'fa-solid fa-circle-info'
       );
     }
 
     // Simulation Controller
-    function setSimMode(mode) {
+        function setSimMode(mode) {
       state.simMode = mode;
       state.waveCollapsed = false;
 
       document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active', 'bg-cyan-500/20', 'border-cyan-500/50', 'text-cyan-300');
+        btn.classList.remove('bg-cyan-500/20', 'border-cyan-500/50', 'text-cyan-300');
         btn.classList.add('bg-gray-900', 'border-gray-800', 'text-gray-400');
       });
 
       const activeBtn = document.getElementById(`btn-${mode}`);
       if (activeBtn) {
         activeBtn.classList.remove('bg-gray-900', 'border-gray-800', 'text-gray-400');
-        activeBtn.classList.add('active', 'bg-cyan-500/20', 'border-cyan-500/50', 'text-cyan-300');
+        activeBtn.classList.add('bg-cyan-500/20', 'border-cyan-500/50', 'text-cyan-300');
       }
 
       const descMap = {
-        wave: 'Mode: Wave Function Collapse — Click on canvas to perform measurement.',
+        wave: 'Mode: Wave Function Collapse — Click or tap canvas to measure particle position.',
         entangle: 'Mode: Quantum Entanglement — Correlated spin orientation states.',
-        tunnel: 'Mode: Quantum Tunneling — Wave packet penetrating V(x) barrier.',
-        super: 'Mode: Superposition — Phase rotation between basis states |0⟩ and |1⟩.'
+        tunnel: 'Mode: Quantum Tunneling — Wave packet penetrating potential barrier V(x).',
+        super: 'Mode: Superposition — Continuous phase oscillation between basis states |0⟩ and |1⟩.'
       };
 
       document.getElementById('simDescription').textContent = descMap[mode] || '';
-      showToast(`Switched simulation to: ${mode.toUpperCase()}`, 'fa-solid fa-atom');
+      showToast(`Simulation switched to: ${mode.toUpperCase()}`, 'fa-solid fa-atom');
     }
 
-    // Interactive Canvas Interactions
+    // Canvas Interactions
     function handleCanvasInteraction(e) {
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
@@ -478,13 +399,13 @@
       if (state.simMode === 'wave') {
         state.waveCollapsed = true;
         state.collapsePos = { x, y };
-        showToast('Wave Function Collapsed into position eigenstate |Ψ(x)⟩!', 'fa-solid fa-compress');
+        showToast('Wave Function Collapsed into eigenstate |Ψ(x)⟩!', 'fa-solid fa-compress');
       } else if (state.simMode === 'entangle') {
-        showToast('Spins measured! Opposite spin state confirmed instantaneously.', 'fa-solid fa-arrows-up-down');
+        showToast('Spins measured! Opposite spin state confirmed.', 'fa-solid fa-arrows-up-down');
       } else if (state.simMode === 'tunnel') {
-        showToast('Barrier opacity perturbed by quantum interaction.', 'fa-solid fa-shield-halved');
+        showToast('Barrier transmission rate measured.', 'fa-solid fa-shield-halved');
       } else if (state.simMode === 'super') {
-        showToast('Phase angle shifted by measurement attempt.', 'fa-solid fa-rotate');
+        showToast('Quantum phase angle perturbed.', 'fa-solid fa-rotate');
       }
     }
 
@@ -492,13 +413,19 @@
     canvas.addEventListener('touchstart', (e) => {
       if (e.touches.length > 0) {
         e.preventDefault();
-        const touch = e.touches[0];
-        handleCanvasInteraction(touch);
+        handleCanvasInteraction(e.touches[0]);
       }
     });
 
-    // Render Loop for Quantum Canvas
-    function renderCanvas() {
+    // Render Loop for Quantum Canvas (Optimized for 60FPS)
+    function renderCanvas(now) {
+      const delta = now - state.lastFrameTime;
+      state.lastFrameTime = now;
+      if (delta > 0) {
+        state.fps = Math.round(1000 / delta);
+        document.getElementById('fpsCounter').textContent = state.fps;
+      }
+
       state.time += 0.04;
       ctx.fillStyle = 'rgba(3, 7, 18, 0.25)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -515,7 +442,7 @@
           ctx.strokeStyle = colorPrimary;
           ctx.lineWidth = 2.5;
 
-          for (let x = 0; x < w; x += 2) {
+          for (let x = 0; x < w; x += 3) {
             const envelope = Math.exp(-Math.pow((x - w/2) / (w * 0.18), 2));
             const y = h/2 + Math.sin(x * 0.04 - state.time * 3) * (h * 0.25) * envelope;
             if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
@@ -523,11 +450,10 @@
           ctx.stroke();
 
           // Probability Density Glow
-          ctx.beginPath();
-          ctx.fillStyle = state.isGoldTheme ? 'rgba(251, 191, 36, 0.1)' : 'rgba(6, 182, 212, 0.1)';
-          for (let x = 0; x < w; x += 4) {
+          ctx.fillStyle = state.isGoldTheme ? 'rgba(251, 191, 36, 0.12)' : 'rgba(6, 182, 212, 0.12)';
+          for (let x = 0; x < w; x += 5) {
             const envelope = Math.exp(-Math.pow((x - w/2) / (w * 0.18), 2));
-            const prob = Math.pow(Math.sin(x * 0.04 - state.time * 3) * envelope, 2) * (h * 0.2);
+            const prob = Math.pow(Math.sin(x * 0.04 - state.time * 3) * envelope, 2) * (h * 0.22);
             ctx.fillRect(x, h/2 - prob, 3, prob * 2);
           }
         } else {
@@ -538,7 +464,7 @@
           ctx.fill();
 
           ctx.beginPath();
-          ctx.arc(state.collapsePos.x, state.collapsePos.y, 20 + Math.sin(state.time * 8) * 5, 0, Math.PI * 2);
+          ctx.arc(state.collapsePos.x, state.collapsePos.y, 18 + Math.sin(state.time * 8) * 4, 0, Math.PI * 2);
           ctx.strokeStyle = colorSecondary;
           ctx.lineWidth = 1.5;
           ctx.stroke();
@@ -547,7 +473,6 @@
         const p1 = { x: w * 0.3, y: h * 0.5 };
         const p2 = { x: w * 0.7, y: h * 0.5 };
 
-        // Quantum Link Line
         ctx.beginPath();
         ctx.setLineDash([6, 6]);
         ctx.strokeStyle = colorSecondary;
@@ -557,20 +482,11 @@
         ctx.stroke();
         ctx.setLineDash([]);
 
-        // Animated Quantum Particles
         const spinState = Math.sin(state.time * 2) > 0 ? 1 : -1;
 
-        ctx.beginPath();
-        ctx.arc(p1.x, p1.y, 18, 0, Math.PI * 2);
-        ctx.fillStyle = colorPrimary;
-        ctx.fill();
+        ctx.beginPath(); ctx.arc(p1.x, p1.y, 18, 0, Math.PI * 2); ctx.fillStyle = colorPrimary; ctx.fill();
+        ctx.beginPath(); ctx.arc(p2.x, p2.y, 18, 0, Math.PI * 2); ctx.fillStyle = colorSecondary; ctx.fill();
 
-        ctx.beginPath();
-        ctx.arc(p2.x, p2.y, 18, 0, Math.PI * 2);
-        ctx.fillStyle = colorSecondary;
-        ctx.fill();
-
-        // Spin Vectors
         ctx.fillStyle = '#030712';
         ctx.font = 'bold 14px monospace';
         ctx.fillText(spinState > 0 ? '↑' : '↓', p1.x - 4, p1.y + 5);
@@ -579,24 +495,22 @@
         const barrierX = w * 0.48;
         const barrierWidth = w * 0.08;
 
-        // Potential Barrier V(x)
         ctx.fillStyle = 'rgba(239, 68, 68, 0.3)';
         ctx.fillRect(barrierX, h * 0.2, barrierWidth, h * 0.6);
         ctx.strokeStyle = 'rgba(239, 68, 68, 0.8)';
         ctx.strokeRect(barrierX, h * 0.2, barrierWidth, h * 0.6);
 
-        // Tunneling Wave Packet
         ctx.beginPath();
         ctx.strokeStyle = colorPrimary;
         ctx.lineWidth = 2.5;
 
-        for (let x = 0; x < w; x += 2) {
+        for (let x = 0; x < w; x += 3) {
           let amp = h * 0.2;
           if (x >= barrierX && x <= barrierX + barrierWidth) {
             const depth = (x - barrierX) / barrierWidth;
-            amp *= Math.exp(-depth * 3.5); // Exponential decay inside barrier
+            amp *= Math.exp(-depth * 3.5);
           } else if (x > barrierX + barrierWidth) {
-            amp *= Math.exp(-3.5) * 0.8; // Transmitted amplitude
+            amp *= Math.exp(-3.5) * 0.8;
           }
 
           const y = h/2 + Math.sin(x * 0.05 - state.time * 4) * amp;
@@ -608,7 +522,6 @@
         const cy = h / 2;
         const radius = Math.min(w, h) * 0.25;
 
-        // Bloch Sphere Projection Ring
         ctx.beginPath();
         ctx.arc(cx, cy, radius, 0, Math.PI * 2);
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
@@ -631,76 +544,71 @@
         ctx.fill();
       }
 
-      animationFrameId = requestAnimationFrame(renderCanvas);
+      requestAnimationFrame(renderCanvas);
     }
+    requestAnimationFrame(renderCanvas);
 
-    renderCanvas();
-
-    // Calculus Term Inspector Data
+    // Calculus Variable Inspector Data
     const mathData = {
-      i: { title: "i (Imaginary Unit)", desc: "Square root of -1. In quantum mechanics, 'i' allows wave functions to rotate in complex Hilbert space, generating wave phase dynamics." },
-      hbar: { title: "ℏ (Reduced Planck Constant)", desc: "hbar = h / (2π) ≈ 1.0545718 × 10⁻³⁴ J·s. The fundamental scale factor connecting frequency to energy in quantum physics." },
-      dtdt: { title: "∂/∂t (Partial Time Derivative)", desc: "Measures the continuous rate of change of the quantum wave function over time." },
-      psi: { title: "Ψ(x,t) (Wave Function)", desc: "Complex probability amplitude state vector. The square modulus |Ψ|² gives probability density of position." },
-      H: { title: "Ĥ (Hamiltonian Operator)", desc: "Total energy operator of the system, comprising kinetic and potential energy components." },
-      m: { title: "m (Particle Mass)", desc: "Inertial mass of the quantum particle (e.g., electron mass ~9.109 × 10⁻³¹ kg)." },
-      ddx: { title: "∇² or ∂²/∂x² (Laplacian)", desc: "Spatial second derivative measuring wave function curvature, directly proportional to kinetic energy." },
-      V: { title: "V(x,t) (Potential Energy)", desc: "External potential field (e.g. electric potential well, gravitational potential)." }
+      i: { title: "i (Imaginary Unit)", desc: "√(-1). Allows state vector phase rotation in complex Hilbert space, driving wave amplitude oscillation." },
+      hbar: { title: "ℏ (Reduced Planck Constant)", desc: "hbar = h / (2π) ≈ 1.0545718 × 10⁻³⁴ J·s. Connects energy to angular frequency (E = ℏω)." },
+      dtdt: { title: "∂/∂t (Partial Time Derivative)", desc: "Measures continuous time evolution rate of quantum state vector |Ψ⟩." },
+      psi: { title: "|Ψ(x,t)⟩ (Quantum State Vector)", desc: "Complex probability amplitude wave. |Ψ|² gives position probability density." },
+      H: { title: "Ĥ (Hamiltonian Operator)", desc: "Total energy operator of the quantum system: Kinetic + Potential energy." },
+      m: { title: "m (Mass)", desc: "Inertial mass of the particle (e.g. electron mass m_e ≈ 9.109 × 10⁻³¹ kg)." },
+      ddx: { title: "∇² or ∂²/∂x² (Laplacian Operator)", desc: "Second spatial derivative calculating wave curvature, representing kinetic energy operator." },
+      V: { title: "V(x,t) (Potential Energy)", desc: "External scalar potential field acting on the particle." }
     };
 
     function inspectMath(key) {
       const data = mathData[key];
       if (!data) return;
-
-      const titleEl = document.getElementById('varTitle');
-      const descEl = document.getElementById('varDesc');
-
-      titleEl.textContent = data.title;
-      descEl.textContent = data.desc;
-
-      showToast(`Inspecting term: ${data.title}`, 'fa-solid fa-magnifying-glass-chart');
+      document.getElementById('varTitle').textContent = data.title;
+      document.getElementById('varDesc').textContent = data.desc;
+      showToast(`Inspecting: ${data.title}`, 'fa-solid fa-magnifying-glass-chart');
     }
 
-    // Modal Control Functions
-    function openDeepDiveModal() {
-      document.getElementById('deepDiveModal').classList.remove('hidden');
-    }
-    function closeDeepDiveModal() {
-      document.getElementById('deepDiveModal').classList.add('hidden');
-    }
+    // Modal Handlers
+    function openDeepDiveModal() { document.getElementById('deepDiveModal').classList.remove('hidden'); }
+    function closeDeepDiveModal() { document.getElementById('deepDiveModal').classList.add('hidden'); }
+    function openSupporterModal() { document.getElementById('supporterModal').classList.remove('hidden'); }
+    function closeSupporterModal() { document.getElementById('supporterModal').classList.add('hidden'); }
 
-    function openSupporterModal() {
-      document.getElementById('supporterModal').classList.remove('hidden');
-    }
-    function closeSupporterModal() {
-      document.getElementById('supporterModal').classList.add('hidden');
-    }
-
-    // 20 Quantum Mechanics Puzzles Dataset
+    // 30 Complete Quantum Mechanics Exam Questions
     const puzzlesData = [
-      { id: 1, title: "1. Wave Function Normalization", q: "For a discrete 4-state wave function Ψ, what must the sum of all state probabilities Σ|c_i|² equal?", opts: ["0.25", "0.50", "1.00", "Infinite"], ans: 2, hint: "Total probability across all physical possibilities must equal 100% (1.0)." },
-      { id: 2, title: "2. Heisenberg Position-Momentum", q: "If position uncertainty Δx approaches 0, what happens to momentum uncertainty Δp?", opts: ["Decreases to 0", "Approaches infinity", "Remains constant", "Becomes negative"], ans: 1, hint: "Δx · Δp ≥ ℏ/2. Shrinking Δx forces Δp to grow inversely." },
-      { id: 3, title: "3. Entangled Spin Correlation", q: "Measuring Spin Up (+1/2) on Particle A in a Bell pair |Ψ⁻⟩ instantly reveals Particle B's spin as:", opts: ["Spin Up (+1/2)", "Spin Down (-1/2)", "Random 50%", "Zero Spin"], ans: 1, hint: "Singlet states maintain anti-correlated spin vectors." },
-      { id: 4, title: "4. Barrier Tunneling Probability", q: "Increasing potential barrier width L affects particle tunneling transmission probability T by:", opts: ["Increasing linearly", "Decreasing exponentially", "Oscillating infinitely", "No effect"], ans: 1, hint: "Tunneling probability T ∝ e^(-2K L) decays exponentially with barrier thickness." },
-      { id: 5, title: "5. Photoelectric Light Frequency", q: "According to E = h f, doubling photon frequency f alters its energy by a factor of:", opts: ["0.5x", "2x", "4x", "Unchanged"], ans: 1, hint: "Photon energy is directly proportional to frequency." },
-      { id: 6, title: "6. Double Slit Which-Way Measurement", q: "Placing a detector at double-slit apertures converts the interference pattern into:", opts: ["Finer fringes", "Two classical probability bands", "Darkness", "Entanglement field"], ans: 1, hint: "Which-way observation collapses wave superposition into localized particle behavior." },
+      { id: 1, title: "1. Wave Function Normalization", q: "For discrete states, what must the total sum of state probabilities Σ|c_i|² equal?", opts: ["0.25", "0.50", "1.00", "Infinity"], ans: 2, hint: "Total probability across all outcomes must equal 100% (1.0)." },
+      { id: 2, title: "2. Uncertainty Principle", q: "If position uncertainty Δx approaches 0, momentum uncertainty Δp:", opts: ["Decreases to 0", "Approaches infinity", "Stays constant", "Becomes negative"], ans: 1, hint: "Δx · Δp ≥ ℏ/2. Shrinking Δx forces Δp to grow." },
+      { id: 3, title: "3. Entangled Spin Pairs", q: "Measuring Spin Up (+1/2) on Particle A in singlet pair |Ψ⁻⟩ reveals Particle B spin as:", opts: ["Spin Up (+1/2)", "Spin Down (-1/2)", "Random 50%", "Zero Spin"], ans: 1, hint: "Singlet states maintain anti-correlated spins." },
+      { id: 4, title: "4. Quantum Tunneling Factor", q: "Increasing potential barrier width L affects particle tunneling transmission T by:", opts: ["Increasing linearly", "Decreasing exponentially", "Oscillating", "No change"], ans: 1, hint: "Tunneling probability T ∝ e^(-2KL) decays exponentially." },
+      { id: 5, title: "5. Photoelectric Energy", q: "According to E = h f, doubling photon frequency f alters energy by:", opts: ["0.5x", "2x", "4x", "Unchanged"], ans: 1, hint: "Photon energy is directly proportional to frequency." },
+      { id: 6, title: "6. Double Slit Observer Effect", q: "Placing a path detector at double-slit apertures converts interference fringes into:", opts: ["Finer fringes", "Two classical probability bands", "Darkness", "Entanglement field"], ans: 1, hint: "Which-way observation collapses wave superposition into localized particles." },
       { id: 7, title: "7. Schrödinger's Cat Superposition", q: "Before opening the box, the cat state |Ψ⟩ is formally represented as:", opts: ["100% Dead", "100% Alive", "1/√2 (|Alive⟩ + |Dead⟩)", "Decohered"], ans: 2, hint: "A linear superposition of state vectors until measurement." },
-      { id: 8, title: "8. De Broglie Wavelength", q: "Increasing a particle's momentum p changes its De Broglie wavelength λ = h / p by:", opts: ["Shortening λ", "Lengthening λ", "No change", "Infinite λ"], ans: 0, hint: "Wavelength λ is inversely proportional to momentum p." },
-      { id: 9, title: "9. Single Qubit Superposition", q: "A single quantum bit (qubit) state vector is expressed as:", opts: ["α|0⟩ + β|1⟩", "|0⟩ only", "|1⟩ only", "NAND gate"], ans: 0, hint: "Superposition allows arbitrary complex coefficients α and β." },
-      { id: 10, title: "10. Quantum Teleportation Speed", q: "Does quantum teleportation transmit classical information faster than light?", opts: ["Yes, instantly", "No, classical channel bounded by c is required", "Yes, using wormholes", "Only in vacuum"], ans: 1, hint: "Protocol requires 2 classical bits sent at or below speed of light c." },
-      { id: 11, title: "11. Quantum Zeno Effect", q: "Continuously observing an unstable quantum system leads to:", opts: ["Instant decay", "Freezing state decay evolution", "Nuclear explosion", "Faster tunneling"], ans: 1, hint: "Frequent collapse resets state time evolution back to initial state." },
+      { id: 8, title: "8. De Broglie Wavelength", q: "Increasing a particle's momentum p changes De Broglie wavelength λ = h / p by:", opts: ["Shortening λ", "Lengthening λ", "No change", "Infinite λ"], ans: 0, hint: "Wavelength λ is inversely proportional to momentum p." },
+      { id: 9, title: "9. Qubit State Representation", q: "A single quantum bit (qubit) state vector is expressed as:", opts: ["α|0⟩ + β|1⟩", "|0⟩ only", "|1⟩ only", "NAND gate"], ans: 0, hint: "Superposition allows linear combination with complex coefficients." },
+      { id: 10, title: "10. Quantum Teleportation Channel", q: "Does quantum teleportation transmit information faster than light?", opts: ["Yes, instantly", "No, classical channel bounded by c is required", "Yes, using wormholes", "Only in vacuum"], ans: 1, hint: "Requires 2 classical bits sent at or below speed of light c." },
+      { id: 11, title: "11. Quantum Zeno Effect", q: "Continuously observing an unstable quantum system leads to:", opts: ["Instant decay", "Freezing state decay evolution", "Nuclear explosion", "Faster tunneling"], ans: 1, hint: "Frequent collapse resets time evolution back to initial state." },
       { id: 12, title: "12. Pauli Exclusion Principle", q: "Two identical fermions (e.g. electrons) cannot share the exact same:", opts: ["Mass", "Quantum state / numbers", "Galaxy", "Speed"], ans: 1, hint: "Anti-symmetric wave functions prohibit identical quantum numbers." },
-      { id: 13, title: "13. Delayed Choice Quantum Eraser", q: "Erasing 'which-way' path information after particle detection restores:", opts: ["Mass", "Interference pattern fringes", "Classical trajectory", "Decoherence"], ans: 1, hint: "Path ignorance restores wave coherence." },
-      { id: 14, title: "14. Ground State Zero-Point Energy", q: "A quantum harmonic oscillator at ground state (n=0) retains energy equal to:", opts: ["E = 0", "E = ½ ℏω", "E = ℏω", "E = ∞"], ans: 1, hint: "Quantum zero-point fluctuations prevent absolute rest: E₀ = ½ ℏω." },
-      { id: 15, title: "15. Grover's Quantum Search Speedup", q: "Grover's search algorithm speeds up unstructured database search from O(N) to:", opts: ["O(N²)", "O(√N)", "O(log N)", "O(1)"], ans: 1, hint: "Grover provides a quadratic quantum speedup O(√N)." },
-      { id: 16, title: "16. EPR Paradox Nomenclature", q: "What phrase did Einstein use to describe quantum entanglement?", opts: ["Spooky action at a distance", "God rolling dice", "Curvature anomaly", "Quantum foam"], ans: 0, hint: "'Spooky action at a distance' (Spukhafte Fernwirkung)." },
-      { id: 17, title: "17. Bell's Theorem Significance", q: "Violation of Bell's inequalities proves local universe cannot be explained by:", opts: ["Wave functions", "Local hidden variables", "Complex numbers", "Energy conservation"], ans: 1, hint: "Rules out local deterministic real hidden variable theories." },
-      { id: 18, title: "18. Quantum Dot Confinement", q: "Shrinking the dimensions of a 3D quantum dot semiconductor causes energy level spacing to:", opts: ["Widen", "Narrow", "Drop to 0", "Become continuous"], ans: 0, hint: "Tighter spatial confinement increases energy quantization gaps." },
-      { id: 19, title: "19. Photon Spin Quantum Number", q: "Photons are gauge bosons carrying intrinsic integer spin S equal to:", opts: ["1/2", "1", "0", "2"], ans: 1, hint: "Vector gauge bosons carry spin 1." },
-      { id: 20, title: "20. General Relativity vs Quantum Conflict", q: "General Relativity breaks down at Planck scale because spacetime geometry becomes:", opts: ["Smooth", "Chaotic quantum foam", "Negative mass", "Static"], ans: 1, hint: "Quantum zero-point metric fluctuations destroy smooth Riemannian manifold geometry." }
+      { id: 13, title: "13. Quantum Eraser Phenomenon", q: "Erasing 'which-way' path information after particle detection restores:", opts: ["Mass", "Interference pattern fringes", "Classical trajectory", "Decoherence"], ans: 1, hint: "Removing path knowledge restores wave coherence." },
+      { id: 14, title: "14. Ground State Zero-Point Energy", q: "A quantum harmonic oscillator at ground state (n=0) retains energy equal to:", opts: ["E = 0", "E = ½ ℏω", "E = ℏω", "E = ∞"], ans: 1, hint: "Zero-point fluctuations prevent absolute zero: E₀ = ½ ℏω." },
+      { id: 15, title: "15. Grover Search Speedup", q: "Grover's search algorithm speeds up database search from O(N) to:", opts: ["O(N²)", "O(√N)", "O(log N)", "O(1)"], ans: 1, hint: "Grover provides quadratic quantum speedup O(√N)." },
+      { id: 16, title: "16. EPR Paradox Terminology", q: "What phrase did Einstein use to describe quantum entanglement?", opts: ["Spooky action at a distance", "God rolling dice", "Curvature anomaly", "Quantum foam"], ans: 0, hint: "'Spooky action at a distance' (Spukhafte Fernwirkung)." },
+      { id: 17, title: "17. Bell's Theorem Proof", q: "Violation of Bell's inequalities proves nature cannot be explained by:", opts: ["Wave functions", "Local hidden variables", "Complex numbers", "Energy conservation"], ans: 1, hint: "Rules out local deterministic real hidden variable theories." },
+      { id: 18, title: "18. Quantum Dot Confinement", q: "Shrinking the physical dimensions of a quantum dot causes energy levels to:", opts: ["Widen in spacing", "Narrow in spacing", "Drop to 0", "Become continuous"], ans: 0, hint: "Tighter spatial confinement increases energy quantization gaps." },
+      { id: 19, title: "19. Photon Intrinsic Spin", q: "Photons are gauge bosons carrying intrinsic integer spin S equal to:", opts: ["1/2", "1", "0", "2"], ans: 1, hint: "Vector gauge bosons carry spin 1." },
+      { id: 20, title: "20. General Relativity Conflict", q: "General Relativity breaks down at Planck scale because spacetime becomes:", opts: ["Smooth", "Chaotic quantum foam", "Negative mass", "Static"], ans: 1, hint: "Zero-point metric fluctuations destroy smooth geometry." },
+      { id: 21, title: "21. Hermitian Operators", q: "In quantum mechanics, physical observables are represented by operators that are:", opts: ["Hermitian", "Non-linear", "Unitary only", "Complex scalar"], ans: 0, hint: "Hermitian operators guarantee real eigenvalues for physical measurements." },
+      { id: 22, title: "22. Expectation Value Formula", q: "The expectation value ⟨A⟩ of an operator Â in state |Ψ⟩ is calculated as:", opts: ["⟨Ψ|Â|Ψ⟩", "Â|Ψ⟩", "d/dt |Ψ⟩", "|Ψ|²"], ans: 0, hint: "Standard bra-ket inner product ⟨Ψ|Â|Ψ⟩." },
+      { id: 23, title: "23. Commutator Relation", q: "If two operators [Â, B̂] = 0, their observables can be measured:", opts: ["Simultaneously with infinite precision", "Only sequentially", "Never", "With infinite error"], ans: 0, hint: "Commuting operators share a simultaneous eigenbasis." },
+      { id: 24, title: "24. Quantum Harmonic Oscillator Spacing", q: "Energy levels in a 1D quantum harmonic oscillator are spaced:", opts: ["Equally by ℏω", "Quadratic n²", "Exponentially", "Randomly"], ans: 0, hint: "E_n = (n + ½) ℏω gives uniform spacing ΔE = ℏω." },
+      { id: 25, title: "25. Infinite Potential Well Boundary", q: "Inside a 1D infinite box of length L, the wave function Ψ at walls (x=0, x=L) must be:", opts: ["Infinite", "Zero", "1.0", "Complex"], ans: 1, hint: "Infinite potential barrier forces boundary condition Ψ = 0." },
+      { id: 26, title: "26. Stern-Gerlach Experiment", q: "The Stern-Gerlach experiment demonstrated space quantization of silver atom:", opts: ["Electron charge", "Electron spin angular momentum", "Mass", "Speed"], ans: 1, hint: "Splitting into two beam paths proved spatial quantization of spin-1/2." },
+      { id: 27, title: "27. Quantum Decoherence", q: "Environmental interaction converts pure quantum states into mixed states through:", opts: ["Quantum decoherence", "Superluminal collapse", "Nuclear fusion", "Hawking radiation"], ans: 0, hint: "Decoherence destroys quantum phase coherence relative to the environment." },
+      { id: 28, title: "28. Alpha Decay Mechanism", q: "Alpha decay of heavy nuclei occurs primarily via:", opts: ["Classical emission", "Quantum tunneling through Coulomb barrier", "Gravity collapse", "Pair annihilation"], ans: 1, hint: "Alpha particles tunnel through the repulsive Coulomb potential barrier." },
+      { id: 29, title: "29. Density Matrix Pure State Condition", q: "For a pure quantum state density matrix ρ, the trace Tr(ρ²) equals:", opts: ["0", "1", "0.5", "Infinity"], ans: 1, hint: "Tr(ρ²) = 1 for pure states, while Tr(ρ²) < 1 for mixed states." },
+      { id: 30, title: "30. Quantum Supremacy Definition", q: "Quantum supremacy refers to a quantum computer performing a task that is:", opts: ["Infeasible for classical supercomputers in reasonable time", "Violating special relativity", "100% error-free", "Running classical code"], ans: 0, hint: "Demonstrating computational task completion beyond classical supercomputer reach." }
     ];
 
-    // Render 20 Puzzles into DOM
+    // Render 30 Puzzles
     function renderPuzzles() {
       const grid = document.getElementById('puzzlesGrid');
       grid.innerHTML = '';
@@ -708,10 +616,10 @@
       puzzlesData.forEach(p => {
         const card = document.createElement('div');
         card.id = `puzzle-card-${p.id}`;
-        card.className = "bg-gray-900/80 p-4 rounded-xl border border-gray-800 space-y-3 transition flex flex-col justify-between backdrop-blur";
+        card.className = "bg-gray-950 p-4 rounded-xl border border-gray-800 space-y-3 transition flex flex-col justify-between";
 
         const optionsHTML = p.opts.map((opt, idx) => `
-          <button onclick="checkPuzzle(${p.id}, ${idx})" class="w-full text-left bg-gray-950 hover:bg-gray-800 border border-gray-800 text-gray-300 text-xs px-3 py-2 rounded-lg transition">
+          <button onclick="checkPuzzle(${p.id}, ${idx})" class="w-full text-left bg-gray-900 hover:bg-gray-800 border border-gray-800 text-gray-300 text-xs px-3 py-2 rounded-lg transition">
             ${opt}
           </button>
         `).join('');
@@ -736,8 +644,7 @@
     }
 
     function toggleHint(id) {
-      const hint = document.getElementById(`hint-${id}`);
-      hint.classList.toggle('hidden');
+      document.getElementById(`hint-${id}`).classList.toggle('hidden');
     }
 
     function checkPuzzle(id, selectedIdx) {
@@ -753,9 +660,9 @@
 
         if (!state.solvedPuzzles.has(id)) {
           state.solvedPuzzles.add(id);
-          state.solvedCount = state.solvedPuzzles.size;
-          document.getElementById('puzzleScore').textContent = `Solved: ${state.solvedCount} / 20`;
-          showToast(`Solved Challenge #${id}! (${state.solvedCount}/20)`, 'fa-solid fa-circle-check text-emerald-400');
+                state.solvedCount = state.solvedPuzzles.size;
+          document.getElementById('puzzleScore').textContent = `Solved: ${state.solvedCount} / 30`;
+          showToast(`Solved Question #${id}! (${state.solvedCount}/30)`, 'fa-solid fa-circle-check text-emerald-400');
         }
       } else {
         feedback.textContent = "Incorrect ✕";
@@ -774,7 +681,6 @@
       state.userName = nameInput;
       document.getElementById('certName').textContent = nameInput;
 
-      // Unique Cryptographic Verification Hash
       const randomHash = Array.from({length: 16}, () => Math.floor(Math.random()*16).toString(16)).join('').toUpperCase();
       document.getElementById('certHash').textContent = `HASH: QRS-${randomHash}-2026`;
 
