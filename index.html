@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Realm Studio - Interactive Quantum Visualizer & Learning Lab</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        qcyan: '#00f3ff',
+                        qpurple: '#9d4edd',
+                        qpink: '#ff007f',
+                        qgold: '#ffd700',
+                        qdark: '#0a0d14',
+                        qcard: 'rgba(17, 24, 39, 0.85)',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['Fira Code', 'Courier New', 'monospace'],
+                    },
+                    boxShadow: {
+                        'neon-cyan': '0 0 15px rgba(0, 243, 255, 0.4)',
+                        'neon-purple': '0 0 15px rgba(157, 78, 221, 0.4)',
+                        'neon-gold': '0 0 15px rgba(255, 215, 0, 0.4)',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styling and animation rules */
+        body {
+            background-color: #07090e;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-panel-glow {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.15);
+        }
+
+        .gold-mode .glass-panel-glow {
+            border-color: rgba(255, 215, 0, 0.4);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+        }
+
+        .gold-mode .text-qcyan {
+            color: #ffd700 !important;
+        }
+
+        .gold-mode .border-qcyan {
+            border-color: #ffd700 !important;
+        }
+
+        .gold-mode .bg-qcyan {
+            background-color: #ffd700 !important;
+            color: #000 !important;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0d14;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f3ff;
+        }
+
+        /* Pulsing & Glow effects */
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.02); }
+        }
+        .animate-pulse-glow {
+            animation: pulseGlow 3s infinite ease-in-out;
+        }
+
+        .math-symbol {
+            transition: all 0.2s ease;
+            cursor: pointer;
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+        .math-symbol:hover {
+            background: rgba(0, 243, 255, 0.2);
+            color: #00f3ff;
+            transform: translateY(-2px);
+        }
+
+        canvas {
+            touch-action: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-qcyan selection:text-black">
+
+    <!-- TOP NAVIGATION HEADER -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-800 px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+            
+            <!-- Logo & Title -->
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-qcyan via-qpurple to-qpink flex items-center justify-center shadow-neon-cyan animate-pulse-glow">
+                    <i class="fa-solid fa-atom text-slate-950 text-xl font-bold"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-qcyan via-white to-qpurple bg-clip-text text-transparent">
+                        QUANTUM REALM STUDIO
+                    </h1>
+                    <p class="text-xs text-slate-400 font-mono">Visualizer & Quantum Mechanics Engine</p>
+                </div>
+            </div>
+
+            <!-- Stats & Progress -->
+            <div class="flex items-center gap-4 text-xs font-mono">
+                <div class="bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-trophy text-qgold"></i>
+                    <span class="text-slate-400">Puzzles:</span>
+                    <span id="puzzleProgressText" class="text-qcyan font-bold">0 / 20</span>
+                </div>
+
+                <div class="bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-bolt text-qpink"></i>
+                    <span class="text-slate-400">Score:</span>
+                    <span id="quantumScoreText" class="text-qpink font-bold">0 PTS</span>
+                </div>
+
+                <!-- Pro Supporter Modal Trigger -->
+                <button onclick="toggleProModal(true)" class="bg-gradient-to-r from-qpurple to-qpink hover:from-qpurple/80 hover:to-qpink/80 text-white font-semibold px-3 py-1.5 rounded-lg transition-all transform active:scale-95 shadow-neon-purple flex items-center gap-2">
+                    <i class="fa-solid fa-crown text-qgold"></i>
+                    <span>Pro Pass</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- NAVIGATION TABS -->
+        <div class="max-w-7xl mx-auto mt-3 pt-2 border-t border-slate-800/60 flex overflow-x-auto gap-2 no-scrollbar">
+            <button onclick="switchTab('visualizer')" id="tab-visualizer" class="tab-btn active text-xs sm:text-sm font-medium px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap transition-all bg-qcyan/20 text-qcyan border border-qcyan/40">
+                <i class="fa-solid fa-wave-square"></i> Quantum Visualizer
+            </button>
+            <button onclick="switchTab('calculus')" id="tab-calculus" class="tab-btn text-xs sm:text-sm font-medium px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap transition-all text-slate-400 hover:text-white hover:bg-slate-800/50">
+                <i class="fa-solid fa-square-root-variable"></i> Calculus & Field Equations
+            </button>
+            <button onclick="switchTab('puzzles')" id="tab-puzzles" class="tab-btn text-xs sm:text-sm font-medium px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap transition-all text-slate-400 hover:text-white hover:bg-slate-800/50">
+                <i class="fa-solid fa-puzzle-piece"></i> 20 Quantum Puzzles
+            </button>
+            <button onclick="switchTab('pro')" id="tab-pro" class="tab-btn text-xs sm:text-sm font-medium px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap transition-all text-slate-400 hover:text-white hover:bg-slate-800/50">
+                <i class="fa-solid fa-certificate"></i> Mastery & Pro Perks
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 lg:p-6 space-y-6">
+
+        <!-- TAB 1: VISUALIZER STUDIO -->
+        <section id="sec-visualizer" class="tab-content block space-y-6">
+            <!-- Top Controls -->
+            <div class="glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-2 overflow-x-auto w-full sm:w-auto">
+                    <span class="text-xs font-mono text-slate-400 uppercase tracking-wider mr-2">Modes:</span>
+                    <button onclick="setVisualizerMode('wave')" id="mode-wave" class="mode-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-qcyan text-slate-950 flex items-center gap-1.5">
+                        <i class="fa-solid fa-chart-line"></i> Wave Collapse
+                    </button>
+                    <button onclick="setVisualizerMode('entangle')" id="mode-entangle" class="mode-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 flex items-center gap-1.5">
+                        <i class="fa-solid fa-link"></i> Entanglement
+                    </button>
+                    <button onclick="setVisualizerMode('tunnel')" id="mode-tunnel" class="mode-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 flex items-center gap-1.5">
+                        <i class="fa-solid fa-arrow-right-to-city"></i> Quantum Tunneling
+                    </button>
+                    <button onclick="setVisualizerMode('superposition')" id="mode-superposition" class="mode-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 flex items-center gap-1.5">
+                        <i class="fa-solid fa-layer-group"></i> Superposition
+                    </button>
+                </div>
+
+                <!-- Simulation Controls -->
+                <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+                    <button onclick="resetVisualizer()" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white border border-slate-700 flex items-center gap-1">
+                        <i class="fa-solid fa-rotate-left"></i> Reset State
+                    </button>
+                    <div class="flex items-center gap-2 text-xs font-mono text-slate-400">
+                        <span>Speed:</span>
+                        <input type="range" id="simSpeed" min="0.1" max="2" step="0.1" value="1" class="w-20 accent-qcyan">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Canvas Container -->
+            <div class="glass-panel-glow rounded-2xl p-4 relative overflow-hidden flex flex-col">
+                <div class="flex items-center justify-between mb-2 px-1">
+                    <div class="flex items-center gap-2">
+                        <span id="canvasModeBadge" class="px-2.5 py-0.5 rounded-full bg-qcyan/20 text-qcyan font-mono text-xs font-bold border border-qcyan/40">
+                            MODE: WAVE FUNCTION COLLAPSE
+                        </span>
+                        <span class="text-xs text-slate-400 hidden sm:inline"><i class="fa-solid fa-hand-pointer text-qcyan animate-bounce"></i> Click anywhere inside canvas to measure particle!</span>
+                    </div>
+                    <span id="canvasStatusText" class="text-xs font-mono text-slate-400">Psi State: Continuous evolution</span>
+                </div>
+
+                <!-- Interactive Visualizer Canvas -->
+                <div class="relative w-full h-[380px] sm:h-[450px] bg-slate-950/80 rounded-xl overflow-hidden border border-slate-800/80">
+                    <canvas id="quantumCanvas" class="w-full h-full cursor-crosshair"></canvas>
+                    
+                    <!-- Overlay Interactive Controls for specific modes -->
+                    <div id="canvasOverlayControls" class="absolute bottom-3 left-3 right-3 glass-panel rounded-xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+                        <!-- Dynamic sliders dynamically updated in JS -->
+                        <div id="dynamicSliders" class="flex flex-wrap items-center gap-4 w-full">
+                            <!-- Populated by JS according to selected visualizer mode -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Physics Info Footer -->
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
+                    <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                        <span class="text-slate-400 block mb-1">State Equation:</span>
+                        <span id="infoEquation" class="text-qcyan font-bold">Ψ(x,t) = A·exp(i(kx - ωt))·e^(-x²/2σ²)</span>
+                    </div>
+                    <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                        <span class="text-slate-400 block mb-1">Probability Density |Ψ|²:</span>
+                        <span id="infoProbability" class="text-qpink font-bold">Integrated Probability = 1.000</span>
+                    </div>
+                    <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                        <span class="text-slate-400 block mb-1">Measurement Outcome:</span>
+                        <span id="infoMeasurement" class="text-qpurple font-bold">Unobserved (Superposition)</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: CALCULUS & FIELD EQUATIONS -->
+        <section id="sec-calculus" class="tab-content hidden space-y-6">
+            <!-- Schrödinger Equation Breakdown -->
+            <div class="glass-panel-glow rounded-2xl p-6 space-y-6">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-square-root-variable text-qcyan"></i> Time-Dependent Schrödinger Equation
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-1">Click on any mathematical operator below to inspect its calculus breakdown and physical meaning.</p>
+                    </div>
+                    <span class="px-3 py-1 rounded-lg bg-qpurple/20 text-qpurple font-mono text-xs border border-qpurple/40">Quantum Wave Mechanics</span>
+                </div>
+
+                <!-- Main Formula Display -->
+                <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 text-center text-xl sm:text-3xl font-mono tracking-wider overflow-x-auto py-8 shadow-inner">
+                    <span onclick="explainMathTerm('i')" class="math-symbol text-qpink font-bold" title="Click to inspect">i</span>
+                    <span onclick="explainMathTerm('hbar')" class="math-symbol text-qcyan font-bold" title="Click to inspect">ℏ</span>
+                    <span onclick="explainMathTerm('dt')" class="math-symbol text-qpurple font-bold" title="Click to inspect">∂/∂t</span>
+                    <span onclick="explainMathTerm('psi')" class="math-symbol text-emerald-400 font-bold" title="Click to inspect">Ψ(x,t)</span>
+                    <span class="text-slate-500 mx-2">=</span>
+                    <span onclick="explainMathTerm('hamiltonian')" class="math-symbol text-qgold font-bold" title="Click to inspect">Ĥ</span>
+                    <span onclick="explainMathTerm('psi')" class="math-symbol text-emerald-400 font-bold" title="Click to inspect">Ψ(x,t)</span>
+                    <span class="text-slate-500 mx-2">=</span>
+                    <span class="text-slate-300">[</span>
+                    <span class="text-slate-400">-</span>
+                    <span onclick="explainMathTerm('hbar')" class="math-symbol text-qcyan" title="Click to inspect">ℏ²</span>
+                    <span class="text-slate-400">/</span>
+                    <span onclick="explainMathTerm('mass')" class="math-symbol text-indigo-400" title="Click to inspect">2m</span>
+                    <span onclick="explainMathTerm('dx2')" class="math-symbol text-qpurple" title="Click to inspect">∂²/∂x²</span>
+                    <span class="text-slate-400">+</span>
+                    <span onclick="explainMathTerm('potential')" class="math-symbol text-amber-400" title="Click to inspect">V(x)</span>
+                    <span class="text-slate-300">]</span>
+                    <span onclick="explainMathTerm('psi')" class="math-symbol text-emerald-400 font-bold" title="Click to inspect">Ψ(x,t)</span>
+                </div>
+
+                <!-- Term Detail Inspection Box -->
+                <div id="mathDetailCard" class="bg-slate-900/90 p-5 rounded-xl border border-qcyan/40 space-y-2 animate-fade-in">
+                    <div class="flex items-center justify-between">
+                        <h3 id="mathTermTitle" class="text-lg font-bold text-qcyan flex items-center gap-2">
+                            <i class="fa-solid fa-circle-info"></i> Select an operator above
+                        </h3>
+                        <span id="mathTermSymbol" class="font-mono text-2xl font-bold text-white bg-slate-950 px-3 py-1 rounded border border-slate-800">-</span>
+                    </div>
+                    <p id="mathTermDesc" class="text-sm text-slate-300 leading-relaxed">
+                        Quantum mechanics relies heavily on complex differential calculus. Click any glowing symbol above (e.g. imaginary unit <code class="text-qpink">i</code>, reduced Planck constant <code class="text-qcyan">ℏ</code>, or Hamiltonian <code class="text-qgold">Ĥ</code>) to view its mathematical definition and physical significance.
+                    </p>
+                </div>
+            </div>
+
+            <!-- General Relativity vs Quantum Mechanics Breakdown -->
+            <div class="glass-panel rounded-2xl p-6 space-y-6">
+                <div class="border-b border-slate-800 pb-4">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-atom text-qpink"></i> Why Einstein's Field Equations Breakdown at Quantum Scale
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-1">The fundamental conflict between General Relativity (GR) and Quantum Mechanics (QM).</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- General Relativity Panel -->
+                    <div class="bg-slate-950 p-5 rounded-xl border border-blue-500/30 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-blue-400 flex items-center gap-2">
+                                <i class="fa-solid fa-globe"></i> General Relativity (Einstein)
+                            </h3>
+                            <span class="text-xs bg-blue-500/10 text-blue-400 px-2.5 py-0.5 rounded border border-blue-500/20 font-mono">Macro / Smooth</span>
+                        </div>
+                        <div class="font-mono text-center text-sm bg-slate-900/80 p-3 rounded text-blue-300 border border-slate-800">
+                            G_μν + Λg_μν = (8πG / c⁴) T_μν
+                        </div>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            Treats spacetime as a smooth, continuous 4D geometric manifold. Energy and momentum (<code class="text-blue-300">T_μν</code>) dictate the exact curvature (<code class="text-blue-300">G_μν</code>) of space. It is strictly deterministic and continuous down to infinitely small distances.
+                        </p>
+                    </div>
+
+                    <!-- Quantum Mechanics Panel -->
+                              <div class="bg-slate-950 p-5 rounded-xl border border-purple-500/30 space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-purple-400 flex items-center gap-2">
+                <i class="fa-solid fa-atom"></i> Quantum Mechanics (Planck/Schrödinger)
+              </h3>
+              <span class="text-xs bg-purple-500/10 text-purple-400 px-2.5 py-0.5 rounded border border-purple-500/20 font-mono">Micro</span>
+            </div>
+            <div class="font-mono text-center text-sm bg-slate-900/80 p-3 rounded text-purple-300 border border-slate-800">
+              iℏ ∂Ψ/∂t = ĤΨ
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Treats the universe as discrete quanta and probability amplitude waves. Quantum uncertainty (<code class="text-purple-300">Δx Δp ≥ ℏ/2</code>) creates microscopic zero-point energy fluctuations.
+            </p>
+          </div>
+        </div>
+
+        <!-- Why GR Fails at Quantum Scale -->
+        <div class="bg-slate-950/80 p-4 rounded-xl border border-amber-500/30 space-y-2 text-xs">
+          <div class="font-bold flex items-center gap-2 text-amber-400 text-sm">
+            <i class="fa-solid fa-triangle-exclamation"></i> Why Einstein's Field Equations Break Down
+          </div>
+          <ul class="list-disc list-inside space-y-1.5 text-slate-300">
+            <li><strong class="text-amber-300">Black Hole Singularities:</strong> GR predicts infinitely dense singularity points where spacetime curvature becomes infinite ($\infty$), resulting in mathematical divide-by-zero errors.</li>
+            <li><strong class="text-amber-300">Planck Scale Quantum Foam:</strong> At distances near the Planck length ($\sim 10^{-35}\text{m}$), quantum fluctuations warp geometry into unpredictable foam, violating GR's assumption of smooth geometry.</li>
+            <li><strong class="text-amber-300">Non-Renormalizability:</strong> Applying quantum field theory perturbative math to gravity yields infinite probabilities that cannot be cancelled out by standard normalization.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: 20 INTERACTIVE PUZZLES -->
+    <section id="puzzles" class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800 space-y-6 backdrop-blur">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+        <div>
+          <h2 class="text-2xl font-bold text-cyan-400 flex items-center gap-2">
+            <i class="fa-solid fa-puzzle-piece"></i> Quantum Challenges & Paradoxes (1–20)
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">Test your quantum mechanical intuition across 20 interactive challenges.</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <span id="puzzle-score" class="text-xs font-bold bg-cyan-950 text-cyan-300 px-3 py-1.5 rounded-lg border border-cyan-800">Solved: 0 / 20</span>
+        </div>
+      </div>
+
+      <div id="puzzle-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Dynamically rendered by JavaScript -->
+      </div>
+    </section>
+
+    <!-- SECTION 4: MONETIZATION & SUPPORTER SECTION -->
+    <section id="supporter" class="bg-gradient-to-r from-cyan-950/60 via-slate-900 to-purple-950/60 p-6 rounded-2xl border border-cyan-500/30 text-center space-y-4">
+      <h2 class="text-2xl font-bold text-amber-400 flex items-center justify-center gap-2">
+        <i class="fa-solid fa-gem text-amber-400"></i> Support Quantum Realm & Unlock Gold Theme
+      </h2>
+      <p class="text-xs text-slate-300 max-w-xl mx-auto">
+        Support ongoing physics web visualizers! A small $1–$2 contribution unlocks the special Supporter Gold Neon visualizer theme and generates your verified Certificate of Mastery.
+      </p>
+      <div class="flex flex-wrap justify-center gap-4 pt-2">
+        <a href="https://ko-fi.com" target="_blank" rel="noopener noreferrer" class="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl shadow-lg transition flex items-center gap-2">
+          <i class="fa-solid fa-coffee"></i> Support $2 on Ko-fi
+        </a>
+        <a href="https://buymeacoffee.com" target="_blank" rel="noopener noreferrer" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl shadow-lg transition flex items-center gap-2">
+          <i class="fa-solid fa-mug-hot"></i> Buy Me a Coffee ($2)
+        </a>
+        <button onclick="unlockGoldTheme()" class="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-bold text-xs rounded-xl shadow-lg transition flex items-center gap-2">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Toggle Gold Theme
+        </button>
+      </div>
+    </section>
+
+    <!-- CERTIFICATE SECTION -->
+    <section id="certificate" class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800 text-center space-y-4">
+      <h2 class="text-xl font-bold text-cyan-300"><i class="fa-solid fa-award"></i> Quantum Mastery Certificate</h2>
+      <p class="text-xs text-slate-400">Solve all 20 challenges to claim your personalized quantum mechanics mastery badge.</p>
+      <div class="flex justify-center gap-2 max-w-sm mx-auto">
+        <input type="text" id="user-name" placeholder="Enter Your Full Name" class="bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-cyan-500 flex-1">
+        <button onclick="generateCertificate()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition">Generate</button>
+      </div>
+      <div id="cert-output" class="hidden mt-4 p-6 bg-slate-950 border-2 border-amber-400/80 rounded-xl max-w-lg mx-auto text-center space-y-3 shadow-2xl">
+        <h3 class="text-amber-400 font-serif text-lg font-bold">CERTIFICATE OF QUANTUM MASTERY</h3>
+        <p class="text-xs text-slate-300">This certifies that</p>
+        <p id="cert-name" class="text-lg font-bold text-cyan-300 underline underline-offset-4 decoration-amber-400"></p>
+        <p class="text-xs text-slate-300">has successfully mastered Wave Collapses, Entanglement, and 20 Quantum Mechanics Paradoxes.</p>
+        <div class="text-[10px] text-slate-500 pt-2 border-t border-slate-800">Quantum Realm Studio • Verified Physics Master</div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // --- CANVAS VISUALIZER STATE ---
+    const canvas = document.getElementById('quantum-canvas');
+    const ctx = canvas.getContext('2d');
+    let currentMode = 'wave';
+    let particles = [];
+    let time = 0;
+    let isCollapsed = false;
+    let collapsePoint = { x: 0, y: 0 };
+    let goldTheme = false;
+
+    function resizeCanvas() {
+      if (canvas && canvas.parentElement) {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+      }
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function setMode(mode) {
+      currentMode = mode;
+      isCollapsed = false;
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-cyan-600', 'text-white');
+        btn.classList.add('bg-slate-800', 'text-slate-300');
+      });
+      if (event && event.target) {
+        event.target.classList.remove('bg-slate-800', 'text-slate-300');
+        event.target.classList.add('bg-cyan-600', 'text-white');
+      }
+      
+      const desc = document.getElementById('viz-desc');
+      if (mode === 'wave') desc.textContent = 'Mode: Wave Function Collapse — Tap canvas to measure particle position and collapse Ψ(x,t).';
+      if (mode === 'entangle') desc.textContent = 'Mode: Quantum Entanglement — Instantaneous spin correlation across twin entangled particles.';
+      if (mode === 'tunnel') desc.textContent = 'Mode: Quantum Tunneling — Wave packet penetrating potential barrier V(x) > E.';
+      if (mode === 'super') desc.textContent = 'Mode: Superposition — Coherent linear combination of basis states |Ψ⟩ = α|0⟩ + β|1⟩.';
+    }
+
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      collapsePoint = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      isCollapsed = true;
+      createParticles(collapsePoint.x, collapsePoint.y);
+    });
+
+    function createParticles(x, y) {
+      particles = [];
+      for (let i = 0; i < 35; i++) {
+        particles.push({
+          x, y,
+          vx: (Math.random() - 0.5) * 6,
+          vy: (Math.random() - 0.5) * 6,
+          life: 1,
+          color: goldTheme ? '#fbbf24' : '#22d3ee'
+        });
+      }
+    }
+
+    function animate() {
+      time += 0.05;
+      ctx.fillStyle = 'rgba(2, 6, 23, 0.2)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const primaryColor = goldTheme ? '#fbbf24' : '#22d3ee';
+      const secondaryColor = goldTheme ? '#f59e0b' : '#c084fc';
+
+      if (currentMode === 'wave') {
+        if (!isCollapsed) {
+          ctx.beginPath();
+          ctx.strokeStyle = primaryColor;
+          ctx.lineWidth = 2;
+          for (let x = 0; x < canvas.width; x += 2) {
+            let envelope = Math.exp(-Math.pow((x - canvas.width/2)/120, 2));
+            let y = canvas.height/2 + Math.sin(x*0.05 - time*2) * 50 * envelope;
+            if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+        } else {
+          ctx.beginPath();
+          ctx.arc(collapsePoint.x, collapsePoint.y, 8, 0, Math.PI * 2);
+          ctx.fillStyle = primaryColor;
+          ctx.fill();
+        }
+      } else if (currentMode === 'entangle') {
+        let p1 = { x: canvas.width * 0.3, y: canvas.height / 2 };
+        let p2 = { x: canvas.width * 0.7, y: canvas.height / 2 };
+
+        ctx.beginPath();
+        ctx.setLineDash([5, 5]);
+        ctx.strokeStyle = secondaryColor;
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        let spin1 = Math.sin(time*3) > 0 ? 1 : -1;
+        ctx.beginPath(); ctx.arc(p1.x, p1.y, 16, 0, Math.PI*2); ctx.fillStyle = primaryColor; ctx.fill();
+        ctx.beginPath(); ctx.arc(p2.x, p2.y, 16, 0, Math.PI*2); ctx.fillStyle = secondaryColor; ctx.fill();
+
+        ctx.fillStyle = '#020617';
+        ctx.font = 'bold 12px monospace';
+        ctx.fillText(spin1 > 0 ? '↑' : '↓', p1.x - 4, p1.y + 4);
+        ctx.fillText(spin1 > 0 ? '↓' : '↑', p2.x - 4, p2.y + 4);
+      } else if (currentMode === 'tunnel') {
+        let barrierX = canvas.width * 0.5;
+        let barrierW = 30;
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.4)';
+        ctx.fillRect(barrierX, 20, barrierW, canvas.height - 40);
+
+        ctx.beginPath();
+        ctx.strokeStyle = primaryColor;
+        for (let x = 0; x < canvas.width; x += 2) {
+          let amp = x < barrierX ? 40 : (x > barrierX + barrierW ? 12 : 40 * Math.exp(-(x - barrierX)/10));
+          let y = canvas.height/2 + Math.sin(x*0.08 - time*3) * amp;
+          if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      } else if (currentMode === 'super') {
+        let cx = canvas.width / 2;
+        let cy = canvas.height / 2;
+        ctx.beginPath();
+        ctx.arc(cx + Math.cos(time)*40, cy + Math.sin(time*1.5)*30, 14, 0, Math.PI*2);
+        ctx.fillStyle = primaryColor;
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(cx - Math.cos(time)*40, cy - Math.sin(time*1.5)*30, 14, 0, Math.PI*2);
+        ctx.fillStyle = secondaryColor;
+        ctx.fill();
+      }
+
+      particles.forEach((p, idx) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= 0.02;
+        if (p.life > 0) {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+        } else {
+          particles.splice(idx, 1);
+        }
+      });
+
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    // --- QUANTUM CALCULUS VARIABLES INSPECTOR ---
+    const mathData = {
+      i: { title: "i (Imaginary Unit)", desc: "Square root of -1 (√-1). Allows wave phase rotation and quantum probability amplitude oscillations in complex Hilbert space." },
+      hbar: { title: "ℏ (Reduced Planck Constant)", desc: "hbar = h / (2π) ≈ 1.0545718 × 10⁻³⁴ J·s. Sets the fundamental scale of physical action in quantum mechanics." },
+      dtdt: { title: "∂/∂t (Partial Time Derivative)", desc: "Measures how the quantum state wave function evolves continuously over time." },
+      psi: { title: "Ψ (Quantum Wave Function)", desc: "State vector in Hilbert space. |Ψ(x,t)|² yields the probability density of finding the particle at position x at time t." },
+      H: { title: "Ĥ (Hamiltonian Operator)", desc: "Total energy operator of the system: Ĥ = Kinetic Energy + Potential Energy = (-ℏ²/2m)∇² + V(x)." },
+      m: { title: "m (Mass)", desc: "Mass of the quantum particle (e.g. electron mass m_e ≈ 9.109 × 10⁻³¹ kg)." },
+      ddx: { title: "∂²/∂x² (Spatial Laplacian / Second Derivative)", desc: "Calculates spatial curvature of the wave function, which is proportional to kinetic energy." },
+      V: { title: "V(x) (Potential Energy Field)", desc: "External potential field acting on the particle (e.g. electrostatic potential, harmonic oscillator trap)." }
+    };
+
+    function inspectMath(key) {
+      const info = mathData[key];
+      if (info) {
+        document.getElementById('math-var-title').textContent = info.title;
+        document.getElementById('math-var-desc').textContent = info.desc;
+      }
+    }
+
+    // --- 20 QUANTUM PUZZLES DATA & GENERATOR ---
+    const puzzlesData = [
+      { id: 1, title: "1. Wave Function Normalization", q: "For a uniform state Ψ across 4 states, probability must total 100%. What is P per state?", opts: ["25%", "50%", "100%", "12.5%"], ans: 0, hint: "Total probability ∫|Ψ|²dx = 1. Divide 100% evenly by 4." },
+      { id: 2, title: "2. Uncertainty Principle", q: "If position uncertainty Δx approaches 0, what happens to momentum uncertainty Δp?", opts: ["Approaches 0", "Approaches Infinity", "Stays Constant", "Becomes Negative"], ans: 1, hint: "Δx Δp ≥ ℏ/2. Inverse relationship!" },
+      { id: 3, title: "3. Quantum Entanglement Pair", q: "Alice measures Spin Up (+1/2) on an entangled Bell pair |Ψ⁺⟩. What does Bob measure immediately?", opts: ["Spin Up (+1/2)", "Spin Down (-1/2)", "Random 50%", "Zero Spin"], ans: 1, hint: "Entangled singlet pairs maintain opposite anti-correlated spins." },
+      { id: 4, title: "4. Quantum Tunneling Probability", q: "Increasing the width of a potential barrier V > E causes tunneling probability to:", opts: ["Increase exponentially", "Decrease exponentially", "Stay identical", "Oscillate to infinity"], ans: 1, hint: "Tunneling probability T ≈ e^(-2K L) decays exponentially with barrier width L." },
+      { id: 5, title: "5. Photon Energy (Planck)", q: "What happens to photon energy E = h f when frequency f is doubled?", opts: ["Halved", "Doubled", "Quadrupled", "Unchanged"], ans: 1, hint: "Energy is directly proportional to frequency." },
+      { id: 6, title: "6. Double Slit Observer Effect", q: "Placing a detector at double-slit slits turns interference pattern into:", opts: ["Sharper wave fringes", "Two classical bright lines", "Complete darkness", "Quantum entanglement"], ans: 1, hint: "Measurement collapses wave superposition into localized classical particles." },
+      { id: 7, title: "7. Schrödinger's Cat State", q: "Before opening the box, the cat state is described as:", opts: ["100% Dead", "100% Alive", "|Alive⟩ + |Dead⟩ Superposition", "Decohered"], ans: 2, hint: "Linear superposition of both possible eigenstates until observed." },
+      { id: 8, title: "8. Quantum De Broglie Wavelength", q: "A higher momentum p particle has a De Broglie wavelength λ = h/p that is:", opts: ["Shorter", "Longer", "Equal", "Infinite"], ans: 0, hint: "Wavelength λ is inversely proportional to momentum p." },
+      { id: 9, title: "9. Quantum Superposition Qubit", q: "A single qubit can store state:", opts: ["0 only", "1 only", "0 and 1 simultaneously", "None"], ans: 2, hint: "|Ψ⟩ = α|0⟩ + β|1⟩ allows superposition." },
+      { id: 10, title: "10. Quantum Teleportation", q: "Does quantum teleportation transmit matter/energy faster than light?", opts: ["Yes, instantly", "No, classical communication required", "Yes, using wormholes", "Only in vacuum"], ans: 1, hint: "Requires 2 classical bits sent at or below light speed c." },
+      { id: 11, title: "11. Quantum Zeno Effect", q: "Frequent continuous observation of an unstable quantum state causes it to:", opts: ["Decay instantly", "Freeze and never decay", "Explode", "Tunnel faster"], ans: 1, hint: "Repeated measurement resets collapse back to initial state." },
+      { id: 12, title: "12. Pauli Exclusion Principle", q: "Two identical fermions (e.g. electrons) cannot occupy:", opts: ["Same energy level", "Same quantum state simultaneously", "Same galaxy", "Same spin axis"], ans: 1, hint: "No two identical fermions can share the exact same set of quantum numbers." },
+      { id: 13, title: "13. Quantum Eraser Paradox", q: "Erasing 'which-way' measurement information restores:", opts: ["Mass", "Interference pattern", "Classical trajectories", "Decoherence"], ans: 1, hint: "Removing path knowledge restores quantum wave interference." },
+      { id: 14, title: "14. Ground State Zero-Point Energy", q: "A quantum harmonic oscillator in its ground state (n=0) has energy:", opts: ["E = 0", "E = ½ ℏω", "E = ℏω", "E = ∞"], ans: 1, hint: "Quantum vacuum fluctuations prohibit absolute zero energy (E₀ = ½ ℏω)." },
+      { id: 15, title: "15. Quantum Computing Speedup", q: "Grover's search algorithm provides speedup over classical search of order:", opts: ["O(N)", "O(√N)", "O(log N)", "O(2^N)"], ans: 1, hint: "Grover provides quadratic speedup O(√N)." },
+      { id: 16, title: "16. Einstein-Podolsky-Rosen (EPR)", q: "What did Einstein famously call quantum entanglement?", opts: ["Spooky action at a distance", "God rolling dice", "Curvature of space", "Quantum foam"], ans: 0, hint: "'Spooky action at a distance' (Spukhafte Fernwirkung)." },
+      { id: 17, title: "17. Bell's Theorem", q: "Bell's inequalities prove that quantum mechanics cannot be explained by:", opts: ["Wave functions", "Local hidden variables", "Complex numbers", "Energy conservation"], ans: 1, hint: "Local real hidden variable theories are ruled out by experimental violation of Bell inequalities." },
+      { id: 18, title: "18. Quantum Dot", q: "Confining an electron in a smaller semiconductor quantum dot causes energy levels to:", opts: ["Spread wider apart", "Get closer together", "Drop to zero", "Become continuous"], ans: 0, hint: "Smaller particle-in-a-box confinement increases ground state energy and spacing." },
+      { id: 19, title: "19. Quantum Spin of Photons", q: "Photons are gauge bosons with integer spin equal to:", opts: ["1/2", "1", "0", "2"], ans: 1, hint: "Photons are spin-1 vector bosons." },
+      { id: 20, title: "20. Why GR vs Quantum Conflict Occurs", q: "General Relativity breaks at quantum scales primarily because:", opts: ["Light speed varies", "Spacetime geometry becomes chaotic quantum foam", "Electrons carry charge", "Gravity is negative"], ans: 1, hint: "Quantum energy fluctuations destroy GR's requirement of a smooth spacetime manifold." }
+    ];
+
+    let solvedCount = 0;
+
+    function renderPuzzles() {
+      const container = document.getElementById('puzzle-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      puzzlesData.forEach((p) => {
+        const card = document.createElement('div');
+        card.className = "bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col justify-between space-y-3";
+        card.id = `puzzle-card-${p.id}`;
+
+        let optsHTML = p.opts.map((opt, oIdx) => `
+             <button onclick="checkPuzzle(${p.id}, ${oIdx})" class="w-full text-left bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg p-2 text-xs text-slate-300 transition">
+            ${opt}
+          </button>
+        `).join('');
+
+        card.innerHTML = `
+          <div class="space-y-1">
+            <h4 class="font-bold text-cyan-400 text-xs">${p.title}</h4>
+            <p class="text-xs text-slate-300">${p.q}</p>
+          </div>
+          <div id="opts-${p.id}" class="space-y-1.5">${optsHTML}</div>
+          <div class="flex items-center justify-between pt-1 border-t border-slate-900">
+            <button onclick="showHint(${p.id})" class="text-[10px] text-amber-400 hover:underline flex items-center gap-1">
+              <i class="fa-solid fa-lightbulb"></i> Hint
+            </button>
+            <span id="feedback-${p.id}" class="text-[11px] font-bold"></span>
+          </div>
+          <p id="hint-${p.id}" class="hidden text-[11px] text-amber-200/90 bg-amber-950/40 p-2 rounded border border-amber-800/40">${p.hint}</p>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    function checkPuzzle(id, selectedIdx) {
+      const puzzle = puzzlesData.find(p => p.id === id);
+      const fb = document.getElementById(`feedback-${id}`);
+      const card = document.getElementById(`puzzle-card-${id}`);
+
+      if (selectedIdx === puzzle.ans) {
+        fb.textContent = "Correct! ✓";
+        fb.className = "text-[11px] font-bold text-emerald-400";
+        card.classList.add('border-emerald-500/50');
+        if (!card.dataset.solved) {
+          card.dataset.solved = "true";
+          solvedCount++;
+          document.getElementById('puzzle-score').textContent = `Solved: ${solvedCount} / 20`;
+        }
+      } else {
+        fb.textContent = "Try Again ✕";
+        fb.className = "text-[11px] font-bold text-rose-400";
+      }
+    }
+
+    function showHint(id) {
+      const h = document.getElementById(`hint-${id}`);
+      h.classList.toggle('hidden');
+    }
+
+    renderPuzzles();
+
+    // --- SUPPORTER & CERTIFICATE FUNCTIONS ---
+    function unlockGoldTheme() {
+      goldTheme = !goldTheme;
+      alert(goldTheme ? '✨ Gold Neon Theme Activated!' : 'Cyan Theme Restored.');
+    }
+
+    function generateCertificate() {
+      const name = document.getElementById('user-name').value.trim();
+      if (!name) {
+        alert('Please enter your name first!');
+        return;
+      }
+      document.getElementById('cert-name').textContent = name;
+      document.getElementById('cert-output').classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
